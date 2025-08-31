@@ -1,4 +1,4 @@
-﻿namespace LearnGenres.Entities
+﻿namespace Viberz.Domain.Entities
 {
     public class Song
     {

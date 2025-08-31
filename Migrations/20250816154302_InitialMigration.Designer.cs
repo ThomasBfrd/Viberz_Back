@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Viberz;
 
@@ -11,9 +12,11 @@ using Viberz;
 namespace Viberz.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250816154302_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -47,7 +50,7 @@ namespace Viberz.Migrations
                         new
                         {
                             Id = 2,
-                            Name = "EDM Trap"
+                            Name = "Trap"
                         },
                         new
                         {
@@ -57,7 +60,7 @@ namespace Viberz.Migrations
                         new
                         {
                             Id = 4,
-                            Name = "Drum & Bass"
+                            Name = "Drum'N'Bass"
                         },
                         new
                         {
@@ -72,7 +75,7 @@ namespace Viberz.Migrations
                         new
                         {
                             Id = 7,
-                            Name = "Garage UK"
+                            Name = "UK House / UKG"
                         },
                         new
                         {
@@ -82,7 +85,7 @@ namespace Viberz.Migrations
                         new
                         {
                             Id = 9,
-                            Name = "Stutter House"
+                            Name = "Hyper Techno"
                         });
                 });
 
@@ -98,18 +101,13 @@ namespace Viberz.Migrations
                         .IsRequired()
                         .HasColumnType("longtext");
 
-                    b.Property<string>("FavoriteArtists")
-                        .HasColumnType("longtext")
-                        .HasAnnotation("Relational:JsonPropertyName", "favoriteArtists");
-
-                    b.Property<string>("FavoriteGenres")
-                        .HasColumnType("longtext")
-                        .HasAnnotation("Relational:JsonPropertyName", "favoriteGenres");
-
                     b.Property<string>("Image")
                         .IsRequired()
-                        .HasColumnType("longtext")
-                        .HasAnnotation("Relational:JsonPropertyName", "image");
+                        .HasColumnType("longtext");
+
+                    b.Property<string>("PreferedGenre")
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime(6)");
@@ -119,8 +117,8 @@ namespace Viberz.Migrations
                         .HasColumnType("longtext");
 
                     b.Property<string>("Username")
-                        .HasColumnType("longtext")
-                        .HasAnnotation("Relational:JsonPropertyName", "userName");
+                        .IsRequired()
+                        .HasColumnType("longtext");
 
                     b.HasKey("Id");
 
