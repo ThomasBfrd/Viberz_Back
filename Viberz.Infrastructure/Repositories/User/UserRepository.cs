@@ -1,14 +1,16 @@
-﻿using Microsoft.EntityFrameworkCore;
-using Viberz.Application.DTO.User;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
 using Viberz.Domain.Entities;
-using Viberz.Viberz.Infrastructure.Data;
+using Viberz.Infrastructure.Data;
 
 public class UserRepository : IUserRepository
 {
     private readonly ApplicationDbContext _context;
-    public UserRepository(ApplicationDbContext context)
+    private readonly IMapper _mapper;
+    public UserRepository(ApplicationDbContext context, IMapper mapper)
     {
         _context = context;
+        _mapper = mapper;
     }
 
     public async Task<User?> GetUser(string userId)
@@ -21,13 +23,31 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<User> UpdateUser(User user)
+    public async Task<User> UpdateUser(User user, string userId)
     {
-        _context.Users.Update(user);
+        User? existingUser = await _context.Users.FindAsync(userId);
+        if (existingUser == null) throw new Exception("User not found");
+
+        bool userNameExists = await CheckUserName(user.Username!);
+        if (userNameExists && user.Id != userId) throw new Exception("Username already taken");
+
+        // on détache l'entity pour éviter les conflits de suivi
+        _context.Entry(existingUser).State = EntityState.Detached;
+
+        // on attache la nouvelle entity et on marque comme modifiée
+        _context.Users.Attach(user);
+        _context.Entry(user).State = EntityState.Modified;
+
         await _context.SaveChangesAsync();
         return user;
     }
 
     public async Task<bool> CheckUserName(string userName)
-        => await _context.Users.AnyAsync(u => u.Username!.ToLower() == userName.ToLower());
+    {
+        bool usernameExists = await _context.Users.AnyAsync(u => u.Username!.ToLower() == userName.ToLower());
+
+        if (usernameExists) throw new Exception("Username already exists");
+
+        return false;
+    }
 }

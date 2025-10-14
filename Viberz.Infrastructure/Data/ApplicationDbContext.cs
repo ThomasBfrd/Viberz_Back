@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Viberz.Domain.Entities;
 
-namespace Viberz.Viberz.Infrastructure.Data
+namespace Viberz.Infrastructure.Data
 {
     public class ApplicationDbContext : DbContext
     {

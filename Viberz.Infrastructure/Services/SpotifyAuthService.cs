@@ -1,10 +1,10 @@
-﻿using System.Net.Http.Headers;
+﻿using Microsoft.Extensions.Configuration;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Text.Json.Serialization;
-using Viberz.Application.DTO.Auth;
+using Viberz.Domain.Models;
 
-namespace Viberz.Viberz.Infrastructure.Services;
+namespace Viberz.Infrastructure.Services;
 
 public class SpotifyAuthService
 {
@@ -53,7 +53,7 @@ public class SpotifyAuthService
         return tokens;
     }
 
-    public async Task<SpotifyTokenResponse?> RefreshSpotifyTokenResponse(RefreshSpotifyTokenDTO refreshSpotifyTokenDTO)
+    public async Task<SpotifyTokenResponse?> RefreshSpotifyTokenResponse(SpotifyTokenResponse refreshSpotifyTokenDTO)
     {
         string clientId = _configuration["Spotify:ClientId"] ?? string.Empty;
         string clientSecret = _configuration["Spotify:ClientSecret"] ?? string.Empty;
@@ -67,7 +67,7 @@ public class SpotifyAuthService
         {
             { "grant_type", "refresh_token" },
             { "refresh_token", refreshSpotifyTokenDTO.RefreshToken },
-            { "client_id", refreshSpotifyTokenDTO.ClienId }
+            { "client_id", clientId }
         };
 
         request.Content = new FormUrlEncodedContent(content);
@@ -87,18 +87,4 @@ public class SpotifyAuthService
             throw new Exception("Failed to deserialize the token");
         return tokens;
     }
-}
-
-public class SpotifyTokenResponse
-{
-    [JsonPropertyName("access_token")]
-    public string AccessToken { get; set; } = null!;
-    [JsonPropertyName("token_type")]
-    public string TokenType { get; set; } = null!;
-    [JsonPropertyName("expires_in")]
-    public int ExpiresIn { get; set; }
-    [JsonPropertyName("refresh_token")]
-    public string RefreshToken { get; set; } = null!;
-    [JsonPropertyName("scope")]
-    public string Scope { get; set; } = null!;
 }

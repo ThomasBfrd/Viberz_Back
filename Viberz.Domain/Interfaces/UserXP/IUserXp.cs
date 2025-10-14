@@ -1,6 +1,6 @@
-using Viberz.Application.DTO.Xp;
+using Viberz.Domain.Models;
 
 public interface IUserXp
 {
-    Task<UserXpDTO> GetUserXp(string userId);
+    Task<UserXpInfo> GetUserXp(string userId);
 }

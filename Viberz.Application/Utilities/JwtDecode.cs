@@ -11,7 +11,7 @@ public class JwtDecode(JwtSecurityTokenHandler jwtSecurityTokenHandler)
 
     public UserJwtConnexion GetUserAuthInformations(string authorizationHeader)
     {
-        string jwt = RemoveBearerPrefix(authorizationHeader) ?? 
+        string jwt = RemoveBearerPrefix(authorizationHeader) ??
             throw new Exception("Authorization header is missing or does not contain a Bearer token.");
 
         var token = _jwtSecurityTokenHandler.ReadJwtToken(jwt) ?? throw new Exception("token manquant");

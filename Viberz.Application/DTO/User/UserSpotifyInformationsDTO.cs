@@ -1,5 +1,5 @@
 ﻿using System.Text.Json.Serialization;
-using Viberz.Application.Models;
+using Viberz.Domain.Entities;
 
 namespace Viberz.Application.DTO.User;
 

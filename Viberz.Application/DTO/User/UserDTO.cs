@@ -1,5 +1,4 @@
-﻿using System.Text.Json.Serialization;
-using Viberz.Application.DTO.Xp;
+﻿using Viberz.Application.DTO.Xp;
 using Viberz.Domain.Entities;
 
 public class UserDTO

@@ -1,25 +1,23 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.OpenApi.Any;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
+using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.Songs;
+using Viberz.Application.Interfaces.Guess;
 using Viberz.Domain.Enums;
 
-namespace Viberz.Application.Queries;
+namespace Viberz.Application.Services.GuessGenre;
 
-public class SongFromPlaylist
+public class GuessService : IGuessService
 {
     private readonly HttpClient _httpClient;
-
-    public SongFromPlaylist(HttpClient httpClient)
+    public GuessService(HttpClient httpClient)
     {
         _httpClient = httpClient;
     }
-
-    public async Task<SongDTO> GetSongFromPlaylist(string SpotifyJwt, string PlaylistId, string GenreName, List<string> otherGenres)
+    public async Task<SongDTO> GetSongFromPlaylist(UserJwtConnexion token, string playlistId, string randomGenre, List<string> otherGenres)
     {
-        HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(PlaylistId)}?fields=tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", SpotifyJwt);
+        HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(playlistId)}?fields=tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.SpotifyJwt);
 
         HttpResponseMessage response = await _httpClient.SendAsync(request);
 
@@ -49,8 +47,8 @@ public class SongFromPlaylist
         SongDTO songDTO = new()
         {
             Song = randomSongFromPlaylist,
-            Genre = GenreName,
-            AccessToken = SpotifyJwt,
+            Genre = randomGenre,
+            AccessToken = token.SpotifyJwt,
             EarnedXp = XpGames.GuessGenre,
             OtherGenres = otherGenres
         };

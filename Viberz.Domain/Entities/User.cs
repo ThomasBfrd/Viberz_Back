@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using System.Text.Json.Serialization;
-using Viberz.Application.DTO.User;
-using Viberz.Application.DTO.Xp;
+﻿using System.Text.Json.Serialization;
 
 namespace Viberz.Domain.Entities;
 

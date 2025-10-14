@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using MediatR;
 using Viberz.Application.DTO.User;
+using Viberz.Application.Interfaces.User;
 using Viberz.Application.Utilities;
 using Viberz.Domain.Entities;
 
-public class UpdateUser : IRequest<User>
+public class UpdateUser : IRequest<UserDTO>
 {
     public UserUpdateDTO UserToUpdate { get; }
     public string UserId { get; }
@@ -15,33 +16,22 @@ public class UpdateUser : IRequest<User>
         UserId = userId;
     }
 
-    public class Handler : IRequestHandler<UpdateUser, User>
+    public class Handler : IRequestHandler<UpdateUser, UserDTO>
     {
-        private readonly IUserRepository _userRepository;
-        private readonly IMapper _mapper;
-        private readonly ConvertImageToBase64 _imageToBase64;
+        private readonly IUserService _userService;
 
         public Handler(
-            IUserRepository userRepository,
-            IMapper mapper,
-            ConvertImageToBase64 imageToBase64)
+            IUserService userService)
         {
-            _userRepository = userRepository;
-            _mapper = mapper;
-            _imageToBase64 = imageToBase64;
+            _userService = userService;
         }
 
-        public async Task<User> Handle(UpdateUser request, CancellationToken cancellationToken)
+        public async Task<UserDTO> Handle(UpdateUser request, CancellationToken cancellationToken)
         {
-            User? user = await _userRepository.GetUser(request.UserId)
-                ?? throw new Exception("User not found in database");
+            UserDTO userToUpdate = await _userService.UpdateUser(request.UserToUpdate, request.UserId)
+                ?? throw new Exception("Utilisateur non trouvé");
 
-            bool userNameExists = await _userRepository.CheckUserName(request.UserToUpdate.Username!);
-
-            User updatedUser = _mapper.Map(request.UserToUpdate, user);
-            updatedUser.UpdatedAt = DateTime.UtcNow;
-
-            return await _userRepository.UpdateUser(updatedUser);
+            return userToUpdate;
         }
     }
 }

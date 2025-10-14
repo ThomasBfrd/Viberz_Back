@@ -1,5 +1,4 @@
-﻿using Viberz.Domain.Entities;
-using Viberz.Domain.Enums;
+﻿using Viberz.Domain.Enums;
 
 namespace Viberz.Application.DTO.Songs;
 

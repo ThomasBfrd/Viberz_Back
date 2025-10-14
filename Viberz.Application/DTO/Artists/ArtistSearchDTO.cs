@@ -1,5 +1,4 @@
 ﻿using Viberz.Domain.Entities;
-using SpotifyImage = Viberz.Application.Models.SpotifyImage;
 
 namespace Viberz.Application.DTO.Artists;
 

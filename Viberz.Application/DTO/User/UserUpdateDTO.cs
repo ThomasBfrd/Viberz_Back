@@ -1,6 +1,4 @@
 ﻿using System.Text.Json.Serialization;
-using Viberz.Application.DTO.Artists;
-using Viberz.Domain.Entities;
 
 namespace Viberz.Application.DTO.User;
 

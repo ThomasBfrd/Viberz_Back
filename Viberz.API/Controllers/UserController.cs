@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.User;
 using Viberz.Application.Utilities;
-using Viberz.Domain.Entities;
 
-namespace Viberz.Viberz.API.Controllers;
+namespace Viberz.API.Controllers;
 
 [Route("api/user")]
 [ApiController]
@@ -22,13 +21,12 @@ public class UserController(
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
             throw new Exception("UserId is missing in the JWT.");
 
-        // Exemple de logique :
-        // (Remplace par ton repo ou query pour vérifier l'existence)
         UserDTO? user = await _mediator.Send(new GetUserQuery(token.UserId));
 
         if (user is null)
         {
-            User newUser = await _mediator.Send(new CreateUser(token.SpotifyJwt));
+            UserDTO newUser = await _mediator.Send(new CreateUser(token.SpotifyJwt));
+
             return Ok(newUser);
         }
 
@@ -40,7 +38,7 @@ public class UserController(
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
         throw new Exception("Spotify access token is missing in the JWT.");
 
-        User user = await _mediator.Send(new UpdateUser(userToUpdate, token.UserId));
+        UserDTO user = await _mediator.Send(new UpdateUser(userToUpdate, token.UserId));
         return Ok(user);
     }
 }

@@ -1,9 +1,7 @@
-﻿using MediatR;
-using Viberz.Application.DTO.Xp;
-using Viberz.Application.Models;
-using Viberz.Domain.Entities;
+﻿using Viberz.Domain.Entities;
+using Viberz.Domain.Models;
 
 public interface IXpHistoryRepository
 {
-    Task<XpHistory> AddHistoryGame(string userId, AddXpHistoryGame historyGame, UserXpDTO user, int newTotal);
+    Task<XpHistory> AddHistoryGame(string userId, AddXpHistoryGame historyGame, UserXpInfo user, int newTotal);
 }

@@ -2,10 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.Xp;
-using Viberz.Application.Models;
 using Viberz.Application.Utilities;
+using Viberz.Domain.Models;
 
-namespace Viberz.Viberz.API.Controllers;
+namespace Viberz.API.Controllers;
 
 [Route("api/xp-history")]
 [ApiController]

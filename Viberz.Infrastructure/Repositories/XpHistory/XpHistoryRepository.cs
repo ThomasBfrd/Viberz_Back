@@ -1,10 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.OpenApi.MicrosoftExtensions;
-using Viberz.Application.DTO.Xp;
-using Viberz.Application.Models;
 using Viberz.Domain.Entities;
-using Viberz.Domain.Enums;
-using Viberz.Viberz.Infrastructure.Data;
+using Viberz.Domain.Models;
+using Viberz.Infrastructure.Data;
 
 public class XpHistoryRepository : IXpHistoryRepository
 {
@@ -16,7 +13,7 @@ public class XpHistoryRepository : IXpHistoryRepository
         _mapper = mapper;
     }
 
-    public async Task<XpHistory> AddHistoryGame(string userId, AddXpHistoryGame xpHistory, UserXpDTO user, int newTotal)
+    public async Task<XpHistory> AddHistoryGame(string userId, AddXpHistoryGame xpHistory, UserXpInfo user, int newTotal)
     {
         XpHistory xp = new()
         {

@@ -1,6 +1,5 @@
 ﻿using MediatR;
-using Viberz.Application.DTO.Xp;
-using Viberz.Domain.Entities;
+using Viberz.Application.Interfaces.User;
 
 public class GetUserQuery : IRequest<UserDTO?>
 {
@@ -13,30 +12,17 @@ public class GetUserQuery : IRequest<UserDTO?>
 
 public class GetUserQueryHandler : IRequestHandler<GetUserQuery, UserDTO?>
 {
-    private readonly IUserRepository _userRepository;
-    private readonly IUserXp _userXp;
+    private readonly IUserService _userService;
 
-    public GetUserQueryHandler(IUserRepository userRepository, IUserXp userXp)
+    public GetUserQueryHandler(IUserService userService)
     {
-        _userRepository = userRepository;
-        _userXp = userXp;
+        _userService = userService;
     }
 
     public async Task<UserDTO?> Handle(GetUserQuery request, CancellationToken cancellationToken)
     {
-        User? user = await _userRepository.GetUser(request.UserId);
+        UserDTO? user = await _userService.GetUserById(request.UserId);
 
-        UserXpDTO? userXp = await _userXp.GetUserXp(request.UserId);
-
-        if (user is not null && userXp is not null)
-        {
-            return new()
-            {
-                User = user,
-                Xp = userXp
-            };
-        }
-
-        return null;
+        return user;
     }
 }

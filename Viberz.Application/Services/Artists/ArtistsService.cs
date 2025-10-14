@@ -1,25 +1,23 @@
-﻿using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Net.Http.Headers;
+﻿using System.Net.Http.Headers;
 using System.Text.Json;
-using Viberz.Application.DTO;
 using Viberz.Application.DTO.Artists;
-using Viberz.Domain.Entities;
-using Viberz.Viberz.Infrastructure.Data;
+using Viberz.Application.Interfaces.Artists;
+using Viberz.Application.Interfaces.Genres;
 
-namespace Viberz.Application.Queries;
+namespace Viberz.Application.Services.Artists;
 
-public class GetArtistsFromSearch
+public class ArtistsService : IArtistsService
 {
     private readonly HttpClient _httpClient;
-    private readonly ApplicationDbContext _context;
-    public GetArtistsFromSearch(HttpClient httpClient, GetSpotifyUserInformations getSpotifyUserInformations, ApplicationDbContext context)
+    private readonly IGenresService _genresService;
+
+    public ArtistsService(HttpClient httpClient, IGenresService genresService)
     {
         _httpClient = httpClient;
-        _context = context;
+        _genresService = genresService;
     }
 
-    public async Task<List<ArtistSearchDTO>> GetArtists(string spotifyAccessToken, string searchQuery)
+    public async Task<List<ArtistSearchDTO>> GetArtistsFromSearch(string spotifyAccessToken, string searchQuery)
     {
         HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/search?q={Uri.EscapeDataString(searchQuery)}&type=artist&limit=3");
 
@@ -36,9 +34,8 @@ public class GetArtistsFromSearch
         JsonDocument convert = JsonDocument.Parse(json);
         JsonElement artistsList = convert.RootElement.GetProperty("artists").GetProperty("items");
 
-        var artistsResponse = JsonSerializer.Deserialize<List<ArtistSearchDTO>>(artistsList, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        List<ArtistSearchDTO> artistsResponse = JsonSerializer.Deserialize<List<ArtistSearchDTO>>(artistsList, new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
             ?? throw new Exception("Fail to get artists list");
-
 
         foreach (var artist in artistsResponse)
         {
@@ -48,19 +45,21 @@ public class GetArtistsFromSearch
             {
                 foreach (string genre in artist.Genres)
                 {
-                    var resultGenre = await _context.Genres
-                        .FirstOrDefaultAsync(g => g.Name.ToLower() == genre.ToString().ToLower());
+                    List<string> genresList = await _genresService.GetAllGenres();
+
+                    string? resultGenre = genresList.FirstOrDefault(g => g.ToLower() == genre.ToString().ToLower());
 
                     if (resultGenre is null) continue;
 
                     if (artistGenres.Count < 3)
                     {
-                        artistGenres.Add(resultGenre.Name);
-                    } else
+                        artistGenres.Add(resultGenre);
+                    }
+                    else
                     {
                         continue;
                     }
-                 }
+                }
             }
 
             artist.Genres = artistGenres;

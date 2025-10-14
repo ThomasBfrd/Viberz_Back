@@ -1,17 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
 using Viberz.Application.DTO.Artists;
 using Viberz.Application.DTO.Auth;
-using Viberz.Application.Queries;
+using Viberz.Application.Queries.Artists;
 using Viberz.Application.Utilities;
 
-namespace Viberz.Viberz.API.Controllers;
+namespace Viberz.API.Controllers;
 
 [Route("api/search")]
 [ApiController]
-public class ArtistController(GetArtistsFromSearch getArtistsFromSearch, JwtDecode jwtDecode) : ControllerBase
+public class ArtistController : ControllerBase
 {
-    private readonly GetArtistsFromSearch _getArtistsFromSearch = getArtistsFromSearch;
-    private readonly JwtDecode _jwtDecode = jwtDecode;
+    private readonly IMediator _mediator;
+    private readonly JwtDecode _jwtDecode;
+
+    public ArtistController(IMediator mediator, JwtDecode jwtDecode)
+    {
+        _mediator = mediator;
+        _jwtDecode = jwtDecode;
+    }
 
     [HttpGet]
     public async Task<IActionResult> GetArtistsFromSearch([FromQuery] string artist)
@@ -19,7 +26,7 @@ public class ArtistController(GetArtistsFromSearch getArtistsFromSearch, JwtDeco
         UserJwtConnexion token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
             throw new Exception("Spotify access token is missing in the JWT.");
 
-        List<ArtistSearchDTO> artists = await _getArtistsFromSearch.GetArtists(token.SpotifyJwt, artist);
+        List<ArtistSearchDTO> artists = await _mediator.Send(new GetArtistsQuery(token.SpotifyJwt, artist));
 
         return Ok(artists);
     }

@@ -1,38 +1,24 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Viberz.Application.DTO.Auth;
-using Viberz.Application.Queries;
-using Viberz.Application.Utilities;
-using Viberz.Domain.Entities;
-using Viberz.Viberz.Infrastructure.Data;
+﻿using MediatR;
+using Microsoft.AspNetCore.Mvc;
+using Viberz.Application.Queries.Genres;
 
-namespace Viberz.Viberz.API.Controllers;
+namespace Viberz.API.Controllers;
 
 [Route("api/genres")]
 [ApiController]
 public class GenresController : ControllerBase
 {
-    private readonly ApplicationDbContext _context;
-    private readonly JwtDecode _jwtDecode;
+    private readonly IMediator _mediator;
 
-    public GenresController(GetSpotifyUserInformations getSpotifyUserInformations, ApplicationDbContext context, JwtDecode jwtDecode)
+    public GenresController(IMediator mediator)
     {
-        _context = context;
-        _jwtDecode = jwtDecode;
+        _mediator = mediator;
     }
 
     [HttpGet("getGenres")]
-    public async Task<IActionResult> GetGenres()
+    public async Task<ActionResult<List<string>>> GetGenres()
     {
-       UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-            throw new Exception("UserId is missing in the JWT.");
-
-        List<string> genres = _context.Genres.Select(g => g.Name).ToList();
-
-        if (genres.Count == 0)
-        {
-            return NotFound("No genres found.");
-        }
-
-        return Ok(genres);
+        List<string> result = await _mediator.Send(new GetGenresQuery());
+        return Ok(result);
     }
 }
