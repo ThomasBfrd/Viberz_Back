@@ -15,9 +15,8 @@ public static class DependencyInjection
         // DbContext
         services.AddDbContext<ApplicationDbContext>(options =>
         {
-            var connexionServer = configuration.GetConnectionString("DefaultConnection");
-            var versionServer = ServerVersion.AutoDetect(connexionServer);
-            options.UseMySql(connexionServer, versionServer);
+            string? connexionServer = configuration.GetConnectionString("DefaultConnection");
+            options.UseNpgsql(connexionServer);
         });
 
         // Repositories

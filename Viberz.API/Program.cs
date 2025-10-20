@@ -1,6 +1,4 @@
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Reflection;
+ï»¿using System.IdentityModel.Tokens.Jwt;
 using Viberz.API.Controllers;
 using Viberz.Application.Interfaces.Artists;
 using Viberz.Application.Interfaces.Genres;
@@ -20,17 +18,16 @@ using Viberz.Application.Services.Users;
 using Viberz.Application.Utilities;
 using Viberz.Infrastructure.Configuration;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}");
 
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddOpenApi();
-
+builder.Services.AddSwaggerGen();
 builder.Services.AddInfrastructureServices(builder.Configuration);
-
 builder.Services.AddHttpClient();
+
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddSingleton<JwtSecurityTokenHandler>();
 builder.Services.AddScoped<JwtDecode>();
@@ -41,7 +38,6 @@ builder.Services.AddScoped<IArtistsService, ArtistsService>();
 builder.Services.AddScoped<ISpotifyService, SpotifyService>();
 builder.Services.AddScoped<IGuessService, GuessService>();
 
-// Remplacer les multiples appels AddMediatR par un seul
 builder.Services.AddMediatR(cfg =>
 {
     // Pour les controllers
@@ -64,15 +60,17 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(GetUserQuery).Assembly);
 });
 
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-    ?? new string[] { "https://5k0ngk-ip-88-167-238-19.tunnelmole.net" }; // Provide default value
+string[] allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+    ?? new string[] { "https://www.viberz.app" };
 
-builder.Services.AddCors(option =>
+builder.Services.AddCors(options =>
 {
-    option.AddDefaultPolicy(policy => policy
-        .WithOrigins(allowedOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod());
+    options.AddDefaultPolicy(policy =>
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 builder.Services.AddAutoMapper(cfg =>
@@ -80,79 +78,18 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<AutoMapperProfiles>();
 });
 
-// Probe ciblé des assemblies principaux AVANT le build/app.MapControllers
-ProbeAssemblies(new[]
-{
-    typeof(UserController).Assembly,                    // Viberz.API
-    typeof(AutoMapperProfiles).Assembly,                // Viberz.Application
-    typeof(DependencyInjection).Assembly                // Viberz.Infrastructure
-});
+WebApplication app = builder.Build();
 
-var app = builder.Build();
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI();
+}
 
 app.UseCors();
-
-app.UseHttpsRedirection();
-
+app.UseAuthentication();
 app.UseAuthorization();
-
-// Appel protégé + log complet des LoaderExceptions
-try
-{
-    app.MapControllers();
-}
-catch (ReflectionTypeLoadException ex)
-{
-    DumpReflectionTypeLoadException("MapControllers", ex);
-    throw;
-}
-
+app.UseHttpsRedirection();
+app.MapControllers();
 app.Run();
-
-// ===== Helpers locaux =====
-static void ProbeAssemblies(IEnumerable<Assembly> assemblies)
-{
-    foreach (var asm in assemblies)
-    {
-        try
-        {
-            _ = asm.GetTypes();
-            Console.WriteLine($"[Probe OK] {asm.FullName}");
-        }
-        catch (ReflectionTypeLoadException ex)
-        {
-            Console.WriteLine($"[Probe FAIL] {asm.FullName}");
-            DumpReflectionTypeLoadException($"Probe {asm.GetName().Name}", ex);
-            throw;
-        }
-    }
-}
-
-static void DumpReflectionTypeLoadException(string context, ReflectionTypeLoadException ex)
-{
-    Console.WriteLine($"=== ReflectionTypeLoadException during {context} ===");
-    if (ex.Types is not null)
-    {
-        foreach (var t in ex.Types)
-        {
-            if (t is null) continue;
-            Console.WriteLine($"Type: {t.FullName} from {t.Assembly.FullName}");
-        }
-    }
-    if (ex.LoaderExceptions is not null)
-    {
-        foreach (var le in ex.LoaderExceptions)
-        {
-            Console.WriteLine($"Loader: {le.GetType().Name} - {le.Message}");
-            if (le is System.IO.FileNotFoundException fnf)
-            {
-                Console.WriteLine($"Missing: {fnf.FileName}");
-                if (!string.IsNullOrWhiteSpace(fnf.FusionLog))
-                {
-                    Console.WriteLine("FusionLog:");
-                    Console.WriteLine(fnf.FusionLog);
-                }
-            }
-        }
-    }
-}
