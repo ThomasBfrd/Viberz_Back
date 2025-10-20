@@ -60,15 +60,17 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(GetUserQuery).Assembly);
 });
 
-var allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
-    ?? new string[] { "www.viberz.app" };
+string[] allowedOrigins = builder.Configuration.GetSection("AllowedOrigins").Get<string[]>()
+    ?? new string[] { "https://www.viberz.app" };
 
-builder.Services.AddCors(option =>
+builder.Services.AddCors(options =>
 {
-    option.AddDefaultPolicy(policy => policy
-        .WithOrigins(allowedOrigins)
-        .AllowAnyHeader()
-        .AllowAnyMethod());
+    options.AddDefaultPolicy(policy =>
+        policy
+            .WithOrigins(allowedOrigins)
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials());
 });
 
 builder.Services.AddAutoMapper(cfg =>
@@ -86,7 +88,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors();
-app.UseHttpsRedirection();
+app.UseAuthentication();
 app.UseAuthorization();
+app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
