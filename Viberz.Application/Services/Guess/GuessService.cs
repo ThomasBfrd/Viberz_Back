@@ -3,6 +3,7 @@ using System.Text.Json;
 using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.Songs;
 using Viberz.Application.Interfaces.Guess;
+using Viberz.Application.Models;
 using Viberz.Domain.Enums;
 
 namespace Viberz.Application.Services.GuessGenre;
@@ -14,7 +15,7 @@ public class GuessService : IGuessService
     {
         _httpClient = httpClient;
     }
-    public async Task<SongDTO> GetSongFromPlaylist(UserJwtConnexion token, string playlistId, string randomGenre, List<string> otherGenres)
+    public async Task<RandomSong> GetSongFromPlaylist(UserJwtConnexion token, string playlistId, string randomGenre, List<string> otherGenres)
     {
         HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(playlistId)}?fields=tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.SpotifyJwt);
@@ -44,11 +45,10 @@ public class GuessService : IGuessService
 
         ItemDto randomSongFromPlaylist = songList.Tracks.Items[random.Next(songList.Tracks.Items.Count)];
 
-        SongDTO songDTO = new()
+        RandomSong songDTO = new()
         {
             Song = randomSongFromPlaylist,
             Genre = randomGenre,
-            AccessToken = token.SpotifyJwt,
             EarnedXp = XpGames.GuessGenre,
             OtherGenres = otherGenres
         };

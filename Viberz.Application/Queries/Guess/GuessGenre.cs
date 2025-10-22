@@ -5,25 +5,27 @@ using Viberz.Application.DTO.Songs;
 using Viberz.Application.Interfaces.Genres;
 using Viberz.Application.Interfaces.Guess;
 using Viberz.Application.Interfaces.User;
+using Viberz.Application.Models;
+using Viberz.Application.Utilities;
 
 namespace Viberz.Application.Queries.Guess;
 
-public record GuessGenreQuery(UserJwtConnexion token) : IRequest<SongDTO>;
+public record GuessGenreQuery(UserJwtConnexion token) : IRequest<RandomSongsDTO>;
 
-public class GuessGenre : IRequestHandler<GuessGenreQuery, SongDTO>
+public class GuessGenre : IRequestHandler<GuessGenreQuery, RandomSongsDTO>
 {
-    private readonly IGuessService _guess;
+    private readonly IGuessService _guessService;
     private readonly IUserService _userService;
     private readonly IGenresService _genresService;
 
-    public GuessGenre(IGuessService guess, IUserService userService, IGenresService genresService)
+    public GuessGenre(IGuessService guessService, IUserService userService, IGenresService genresService)
     {
-        _guess = guess;
+        _guessService = guessService;
         _userService = userService;
         _genresService = genresService;
     }
 
-    public async Task<SongDTO> Handle(GuessGenreQuery request, CancellationToken cancellationToken)
+    public async Task<RandomSongsDTO> Handle(GuessGenreQuery request, CancellationToken cancellationToken)
     {
         UserDTO? existingUser = await _userService.GetUserById(request.token.UserId);
 
@@ -33,20 +35,28 @@ public class GuessGenre : IRequestHandler<GuessGenreQuery, SongDTO>
 
         if (genres is null) throw new Exception("Can't get genres");
 
+        var randomSongsTasks = Enumerable.Range(0, 5).Select(async _ =>
+        {
         Random random = new();
+            int randomIndex = random.Next(genres.Count);
+            string randomPlaylistId = genres[randomIndex].SpotifyId;
+            string randomGenre = genres[randomIndex].Name;
+            List<string> randomOtherGenres = genres
+                .Select(a => a.Name)
+                .Where(g => !g.Equals(randomGenre))
+                .ToList();
 
-        int randomIndex = random.Next(genres.Count);
-        string randomPlaylistId = genres[randomIndex].SpotifyId;
-        string randomGenre = genres[randomIndex].Name;
-        List<string> randomOtherGenres = genres
-            .Select(a => a.Name)
-            .Where(g => !g.Equals(randomGenre))
-            .ToList();
+            List<string> otherGenres = TakeRandom.TakeRandomToList(randomOtherGenres, 3, random);
+            
+            return await _guessService.GetSongFromPlaylist(request.token, randomPlaylistId, randomGenre, otherGenres);
+        });
 
-        List<string> otherGenres = randomOtherGenres.OrderBy(x => random.Next()).Take(3).ToList();
+        List<RandomSong> randomSongs = (await Task.WhenAll(randomSongsTasks)).ToList();
 
-        SongDTO songFromPlaylist = await _guess.GetSongFromPlaylist(request.token, randomPlaylistId, randomGenre, otherGenres);
-
-        return songFromPlaylist;
+        return new() 
+        { 
+            RandomSong = randomSongs,
+            AccessToken = request.token.SpotifyJwt
+        };
     }
 }
