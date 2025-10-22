@@ -28,7 +28,7 @@ public class UserRepository : IUserRepository
         User? existingUser = await _context.Users.FindAsync(userId);
         if (existingUser == null) throw new Exception("User not found");
 
-        bool userNameExists = await CheckUserName(user.Username!);
+        bool userNameExists = await CheckUserName(user);
         if (userNameExists && user.Id != userId) throw new Exception("Username already taken");
 
         // on détache l'entity pour éviter les conflits de suivi
@@ -42,9 +42,9 @@ public class UserRepository : IUserRepository
         return user;
     }
 
-    public async Task<bool> CheckUserName(string userName)
+    public async Task<bool> CheckUserName(User user)
     {
-        bool usernameExists = await _context.Users.AnyAsync(u => u.Username!.ToLower() == userName.ToLower());
+        bool usernameExists = await _context.Users.AnyAsync(u => u.Id != user.Id && u.Username!.ToLower() == user.Username.ToLower());
 
         if (usernameExists) throw new Exception("Username already exists");
 
