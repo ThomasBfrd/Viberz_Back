@@ -1,4 +1,6 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.OpenApi.Models;
+using System.IdentityModel.Tokens.Jwt;
 using Viberz.API.Controllers;
 using Viberz.Application.Interfaces.Artists;
 using Viberz.Application.Interfaces.Genres;
@@ -25,6 +27,7 @@ Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}")
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpClient();
 
@@ -56,7 +59,7 @@ builder.Services.AddMediatR(cfg =>
     cfg.RegisterServicesFromAssembly(typeof(GetSpotifyTokenQuery).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(RefreshSpotifyTokenQuery).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(GetGenresQuery).Assembly);
-    cfg.RegisterServicesFromAssembly(typeof(GuessGenreQuery).Assembly);
+    cfg.RegisterServicesFromAssembly(typeof(GuessQuery).Assembly);
     cfg.RegisterServicesFromAssembly(typeof(GetUserQuery).Assembly);
 });
 

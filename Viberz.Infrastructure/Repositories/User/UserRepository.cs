@@ -31,15 +31,16 @@ public class UserRepository : IUserRepository
         bool userNameExists = await CheckUserName(user);
         if (userNameExists && user.Id != userId) throw new Exception("Username already taken");
 
-        // on détache l'entity pour éviter les conflits de suivi
-        _context.Entry(existingUser).State = EntityState.Detached;
-
-        // on attache la nouvelle entity et on marque comme modifiée
-        _context.Users.Attach(user);
-        _context.Entry(user).State = EntityState.Modified;
+        existingUser.Username = user.Username ?? existingUser.Username;
+        existingUser.Email = user.Email ?? existingUser.Email;
+        existingUser.Image = user.Image ?? existingUser.Image;
+        existingUser.UserType = user.UserType ?? existingUser.UserType;
+        existingUser.FavoriteArtists = user.FavoriteArtists ?? existingUser.FavoriteArtists;
+        existingUser.FavoriteGenres = user.FavoriteGenres ?? existingUser.FavoriteGenres;
+        existingUser.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
-        return user;
+        return existingUser;
     }
 
     public async Task<bool> CheckUserName(User user)
