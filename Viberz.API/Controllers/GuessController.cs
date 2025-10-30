@@ -4,6 +4,7 @@ using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.Songs;
 using Viberz.Application.Queries.Guess;
 using Viberz.Application.Utilities;
+using Viberz.Domain.Enums;
 
 namespace Viberz.API.Controllers;
 
@@ -20,15 +21,15 @@ public class GuessController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("guess-genre")]
+    [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RandomSongsDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetGuessGenreFromSpotifySong()
+    public async Task<IActionResult> GetGuessSongsList([FromQuery] List<string>? definedGenre, [FromQuery] Activies gameType)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
             throw new Exception("UserId is missing in the JWT.");
 
-        RandomSongsDTO song = await _mediator.Send(new GuessGenreQuery(token));
+        RandomSongsDTO song = await _mediator.Send(new GuessQuery(token, definedGenre, gameType));
 
         return Ok(song);
     }

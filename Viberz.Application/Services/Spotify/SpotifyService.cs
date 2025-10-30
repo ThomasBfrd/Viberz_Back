@@ -3,6 +3,7 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using Viberz.Application.DTO.Auth;
+using Viberz.Application.DTO.Songs;
 using Viberz.Application.DTO.Spotify;
 using Viberz.Application.DTO.User;
 using Viberz.Application.Interfaces.Spotify;
@@ -120,5 +121,35 @@ public class SpotifyService : ISpotifyService
         }
 
         return userProfile;
+    }
+
+    public async Task<SongFromSpotifyPlaylistDTO> GetSongsPropsFromPlaylist(string spotifyJwt, string playlistId)
+    {
+        HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(playlistId)}?fields=tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", spotifyJwt);
+
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
+
+        if (!response.IsSuccessStatusCode)
+        {
+            string otherErrorJson = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Can't get this playlist : {otherErrorJson}");
+        }
+
+        string json = await response.Content.ReadAsStringAsync();
+
+        if (string.IsNullOrEmpty(json) || json is null)
+        {
+            throw new Exception("Playlist is empty");
+        }
+
+        SongFromSpotifyPlaylistDTO? randomSongs = JsonSerializer.Deserialize<SongFromSpotifyPlaylistDTO>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+        if (randomSongs?.Tracks.Items is null || randomSongs.Tracks.Items.Count == 0)
+        {
+            throw new Exception("No songs found in the playlist");
+        }
+
+        return randomSongs;
     }
 }

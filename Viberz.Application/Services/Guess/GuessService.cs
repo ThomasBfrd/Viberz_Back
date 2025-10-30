@@ -1,58 +1,97 @@
-﻿using System.Net.Http.Headers;
-using System.Text.Json;
-using Viberz.Application.DTO.Auth;
+﻿using Viberz.Application.DTO.Auth;
+using Viberz.Application.DTO.Genres;
 using Viberz.Application.DTO.Songs;
 using Viberz.Application.Interfaces.Guess;
+using Viberz.Application.Interfaces.Spotify;
 using Viberz.Application.Models;
+using Viberz.Application.Utilities;
 using Viberz.Domain.Enums;
 
 namespace Viberz.Application.Services.GuessGenre;
 
 public class GuessService : IGuessService
 {
-    private readonly HttpClient _httpClient;
-    public GuessService(HttpClient httpClient)
+    private readonly ISpotifyService _spotifyService;
+    public GuessService(ISpotifyService spotifyService)
     {
-        _httpClient = httpClient;
+        _spotifyService = spotifyService;
     }
-    public async Task<RandomSong> GetSongFromPlaylist(UserJwtConnexion token, string playlistId, string randomGenre, List<string> otherGenres)
+    public async Task<RandomSong> GetSongFromPlaylist(string token, string playlistId, string randomGenre, List<string>? otherRandomGenresName, List<GenresWithSpotifyId>? genres, Activies gameType)
     {
-        HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(playlistId)}?fields=tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token.SpotifyJwt);
-
-        HttpResponseMessage response = await _httpClient.SendAsync(request);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            string errorJson = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Can't get this playlist : {errorJson}");
-        }
-
-        string json = await response.Content.ReadAsStringAsync();
-        Random random = new Random();
-
-        if (string.IsNullOrEmpty(json) || json is null)
-        {
-            throw new Exception("Playlist is empty");
-        }
-
-        SongFromSpotifyPlaylistDTO? songList = JsonSerializer.Deserialize<SongFromSpotifyPlaylistDTO>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        Random random = new();
+        SongFromSpotifyPlaylistDTO? songList = await _spotifyService.GetSongsPropsFromPlaylist(token, playlistId);
 
         if (songList?.Tracks.Items is null || songList.Tracks.Items.Count == 0)
         {
             throw new Exception("No songs found in the playlist");
         }
 
-        ItemDto randomSongFromPlaylist = songList.Tracks.Items[random.Next(songList.Tracks.Items.Count)];
+        List<ItemDto> randomSongFromPlaylist = TakeRandom.TakeRandomToList(songList.Tracks.Items, 1, random);
 
-        RandomSong songDTO = new()
+        if (gameType == Activies.GuessGenre)
         {
-            Song = randomSongFromPlaylist,
-            Genre = randomGenre,
-            EarnedXp = XpGames.GuessGenre,
-            OtherGenres = otherGenres
-        };
+            return new()
+            {
+                Song = randomSongFromPlaylist[0],
+                Genre = randomGenre,
+                EarnedXp = XpGames.GuessGenre,
+                OtherGenres = otherRandomGenresName
+            };
+        }
 
-        return songDTO;
+        if (genres is not null && genres.Count > 0 && gameType == Activies.GuessSong)
+        {
+            List<ItemDto> alreadySelectedSongs = new();
+            IEnumerable<Task<RandomPropsSongDTO>> otherSongs = Enumerable.Range(0, 3).Select(async _ =>
+            {
+                List<GenresWithSpotifyId> randomGenres = TakeRandom.TakeRandomToList(genres, 1, random);
+
+                SongFromSpotifyPlaylistDTO? otherRandomSongs = await _spotifyService.GetSongsPropsFromPlaylist(token, randomGenres[0].SpotifyId);
+
+                if (otherRandomSongs?.Tracks.Items is null || otherRandomSongs.Tracks.Items.Count == 0)
+                {
+                    throw new Exception("No songs found in the playlist");
+                }
+
+                HashSet<string> alreadySelectedArtistIds = alreadySelectedSongs
+                    .SelectMany(x => x.Track.Artists.Select(a => a.Id))
+                    .Concat(randomSongFromPlaylist[0].Track.Artists.Select(a => a.Id))
+                    .ToHashSet();
+
+                List<ItemDto> availableSongs = otherRandomSongs.Tracks.Items
+                    .Where(song =>
+                        !alreadySelectedSongs.Any(x => x.Track.Id == song.Track.Id) && // Pas déjà sélectionnée
+                        song.Track.Id != randomSongFromPlaylist[0].Track.Id &&         // Pas la chanson principale
+                        !song.Track.Artists.Any(a => alreadySelectedArtistIds.Contains(a.Id)) // Aucun artiste déjà sélectionné
+                    )
+                    .ToList();
+
+                if (availableSongs.Count == 0)
+                {
+                    throw new Exception("No more unique songs available to select.");
+                }
+
+                ItemDto randomOtherSong = TakeRandom.TakeRandomToList(availableSongs, 1, random)[0];
+                alreadySelectedSongs.Add(randomOtherSong);
+
+                return new RandomPropsSongDTO
+                {
+                    Title = randomOtherSong.Track.Name,
+                    Artists = randomOtherSong.Track.Artists.Select(a => a.Name).ToList()
+                };
+            });
+
+            List<RandomPropsSongDTO> randomOtherSongs = (await Task.WhenAll(otherSongs)).ToList();
+
+            return new()
+            {
+                Song = randomSongFromPlaylist[0],
+                Genre = randomGenre,
+                EarnedXp = XpGames.GuessSong,
+                OtherSongs = randomOtherSongs
+            };
+        }
+
+        return null;
     }
 }

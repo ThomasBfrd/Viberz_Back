@@ -28,11 +28,9 @@ public class UserService : IUserService
 
     public async Task<UserDTO> CreateUser(string jwtToken)
     {
-        // 1. Récupérer les infos Spotify
         UserSpotifyInformationsDTO userInfo = await _spotifyService.GetUserSpotifyInformations(jwtToken)
             ?? throw new Exception("Erreur lors de la récupération du user");
 
-        // 2. Convertir l'image
         string imageBase64 = string.Empty;
         if (userInfo.Images?.Count > 0)
         {
@@ -45,11 +43,9 @@ public class UserService : IUserService
             }
         }
 
-        // 3. Vérifier le type d'utilisateur
         if (userInfo.UserProduct != "premium")
             throw new Exception("You must have a premium account to use Viberz.");
 
-        // 4. Créer l'objet User
         User user = new()
         {
             Id = userInfo.Id,
@@ -63,7 +59,6 @@ public class UserService : IUserService
             FavoriteGenres = new List<string>()
         };
 
-        // 5. Persister en base via le repository
         await _userRepository.AddUser(user);
 
         return new UserDTO
