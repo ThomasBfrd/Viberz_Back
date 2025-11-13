@@ -4,7 +4,7 @@ public class TakeRandom
 {
     public static List<T> TakeRandomToList<T>(List<T> list, int numberOfElements, Random random)
     {
-        List<T> copyList = list;
+        List<T> copyList = [.. list];
 
         int n = copyList.Count;
 
