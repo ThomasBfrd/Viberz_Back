@@ -105,4 +105,17 @@ public class UserService : IUserService
             Xp = _mapper.Map<UserXpDTO>(userXpInfo)
         };
     }
+
+    public async Task<bool> DeleteUser(string userId)
+    {
+        User checkUser = await _userRepository.GetUser(userId)
+            ?? throw new Exception("User not found");
+
+        return await _userRepository.DeleteUser(userId);
+    }
+
+    public async Task<bool> IsUserWhitelisted(string email)
+    {
+        return await _userRepository.IsWhitelisted(email);
+    }
 }

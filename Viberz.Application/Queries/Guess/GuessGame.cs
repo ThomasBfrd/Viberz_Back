@@ -41,7 +41,7 @@ public class GuessGame : IRequestHandler<GuessQuery, RandomSongsDTO>
             genres = genres.Where(g => request.DefinedGenres.Contains(g.Name)).ToList();
         }
 
-        IEnumerable<Task<RandomSong>> randomSongsTasks = Enumerable.Range(0, 10).Select(async _ =>
+        IEnumerable<Task<RandomSong>> randomSongsTasks = Enumerable.Range(0, 5).Select(async _ =>
         {
             Random random = new();
             int randomIndex = random.Next(genres.Count);
@@ -55,12 +55,12 @@ public class GuessGame : IRequestHandler<GuessQuery, RandomSongsDTO>
 
             if (request.DefinedGenres is not null && request.DefinedGenres.Count > 0 && request.GameType == Activies.GuessSong)
             {
-                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, randomPlaylistId, randomGenre, null, genres, request.GameType);
+                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, existingUser.User.Id, randomPlaylistId, randomGenre, null, genres, request.GameType);
             } else
             {
                 List<string> otherGenres = TakeRandom.TakeRandomToList(randomOtherGenres, 3, random);
 
-                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, randomPlaylistId, randomGenre, otherGenres, null, request.GameType);
+                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, existingUser.User.Id, randomPlaylistId, randomGenre, otherGenres, null, request.GameType);
             }
         });
 

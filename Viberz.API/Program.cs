@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.OpenApi.Models;
+﻿using Microsoft.OpenApi.Models;
+using Swashbuckle.AspNetCore.Filters;
 using System.IdentityModel.Tokens.Jwt;
 using Viberz.API.Controllers;
 using Viberz.Application.Interfaces.Artists;
@@ -15,6 +15,7 @@ using Viberz.Application.Services.Artists;
 using Viberz.Application.Services.Authentification;
 using Viberz.Application.Services.Genres;
 using Viberz.Application.Services.GuessGenre;
+using Viberz.Application.Services.Redis;
 using Viberz.Application.Services.Spotify;
 using Viberz.Application.Services.Users;
 using Viberz.Application.Utilities;
@@ -26,13 +27,43 @@ Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}")
 // Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.AddSecurityDefinition("bearerAuth", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "JWT Authorization header using the Bearer scheme."
+    });
+
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "bearerAuth"
+                }
+            },
+            new string[] {}
+        }
+
+    });
+    
+    options.OperationFilter<SecurityRequirementsOperationFilter>();
+});
 
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<JwtService>();
 builder.Services.AddSingleton<JwtSecurityTokenHandler>();
+builder.Services.AddSingleton<RedisService>();
 builder.Services.AddScoped<JwtDecode>();
 builder.Services.AddScoped<ConvertImageToBase64>();
 builder.Services.AddScoped<IUserService, UserService>();

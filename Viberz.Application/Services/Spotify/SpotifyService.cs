@@ -31,7 +31,7 @@ public class SpotifyService : ISpotifyService
         string basicAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
 
         request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
-
+         
         Dictionary<string, string> content = new()
         {
             { "grant_type", "authorization_code" },
@@ -71,7 +71,7 @@ public class SpotifyService : ISpotifyService
         {
             { "grant_type", "refresh_token" },
             { "refresh_token", refreshSpotifyTokenDTO.RefreshToken },
-            { "client_id", refreshSpotifyTokenDTO.ClienId }
+            { "client_id", refreshSpotifyTokenDTO.ClientId }
         };
 
         request.Content = new FormUrlEncodedContent(content);

@@ -43,6 +43,26 @@ public class UserRepository : IUserRepository
         return existingUser;
     }
 
+    public async Task<bool> DeleteUser(string userId)
+    {
+        User? existingUser = await _context.Users.FindAsync(userId);
+        if (existingUser == null)
+        {
+            throw new Exception("User not found");
+        } else
+        {
+            _context.Users.Remove(existingUser);
+
+            List<XpHistory>? existingXpHistory = await _context.XpHistories.Where(x => x.UserId == userId).ToListAsync();
+
+            _context.XpHistories.RemoveRange(existingXpHistory);
+
+            await _context.SaveChangesAsync();
+
+            return true;
+        }
+    }
+
     public async Task<bool> CheckUserName(User user)
     {
         bool usernameExists = await _context.Users.AnyAsync(u => u.Id != user.Id && u.Username!.ToLower() == user.Username.ToLower());
@@ -50,5 +70,12 @@ public class UserRepository : IUserRepository
         if (usernameExists) throw new Exception("Username already exists");
 
         return false;
+    }
+
+    public async Task<bool> IsWhitelisted(string email)
+    {
+        bool isWhitelisted = await _context.Whitelist.AnyAsync(e => e.Email.ToLower() == email.ToLower());
+
+        return isWhitelisted;
     }
 }

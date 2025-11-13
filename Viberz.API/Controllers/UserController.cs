@@ -1,7 +1,11 @@
 ﻿using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security;
+using Viberz.Application.Commands.User;
 using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.User;
+using Viberz.Application.Queries.User.IsWhitelisted;
 using Viberz.Application.Utilities;
 
 namespace Viberz.API.Controllers;
@@ -40,5 +44,25 @@ public class UserController(
 
         UserDTO user = await _mediator.Send(new UpdateUser(userToUpdate, token.UserId));
         return Ok(user);
+    }
+
+    [HttpDelete("me")]
+    public async Task<IActionResult> DeleteUser([FromBody] string userId)
+    {
+        UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
+            throw new Exception("UserId is missing in the JWT.");
+
+        bool result = await _mediator.Send(new DeleteUser(token.UserId));
+
+        return Ok(result);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("is-whitelisted")]
+    public async Task<IActionResult> IsUserWhitelisted([FromBody] string email)
+    {
+        bool isWhitelisted = await _mediator.Send(new IsWhitelistedQuery(email));
+
+        return Ok(isWhitelisted);
     }
 }
