@@ -15,6 +15,8 @@ namespace Viberz.Infrastructure.Data
         public DbSet<XpHistory> XpHistories { get; set; }
         public DbSet<XpGrades> XpGrades { get; set; }
 
+        public DbSet<Whitelist> Whitelist { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -28,7 +30,12 @@ namespace Viberz.Infrastructure.Data
                 new Genre { Id = 6, Name = "Hard Techno", SpotifyId = "6LsBdAO09tOMgkt8RJ5ktv" },
                 new Genre { Id = 7, Name = "Garage UK", SpotifyId = "1HzqMHV1TMMZjD0POdlww0" },
                 new Genre { Id = 8, Name = "Hyper Techno", SpotifyId = "5WhatiRekXXBNRXeO6jXmV" },
-                new Genre { Id = 9, Name = "Stutter House", SpotifyId = "08oVyHSMPq79FNRvdxnnPK" }
+                new Genre { Id = 9, Name = "Stutter House", SpotifyId = "08oVyHSMPq79FNRvdxnnPK" },
+                new Genre { Id = 10, Name = "Progressive House", SpotifyId = "3qSskUmTASIyuIKWTfZT2J" },
+                new Genre { Id = 11, Name = "Mid Tempo", SpotifyId = "3hUcNAkx9fQ20kREAR22A7" },
+                new Genre { Id = 12, Name = "Future House", SpotifyId = "6irfmXy7b12btvyYPrpEA4" },
+                new Genre { Id = 13, Name = "Hardstyle", SpotifyId = "2exynTofOAgLHuonZaImx2" },
+                new Genre { Id = 14, Name = "Big Room", SpotifyId = "4bApSsicsTPhjR3zt2UPmg" }
                 );
 
             modelBuilder.Entity<XpGrades>().HasData(
@@ -46,6 +53,10 @@ namespace Viberz.Infrastructure.Data
                 new XpGrades { Id = 12, Level = 12, MinXp = 9500, GradeName = "Legendary Master" }
             );
 
+            modelBuilder.Entity<Whitelist>().HasData(
+                new Whitelist { Id = 1, Email = "thomas.bfrd@gmail.com" },
+                new Whitelist { Id = 2, Email = "micanille@hotmail.fr" }
+            );
         }
     }
 }
