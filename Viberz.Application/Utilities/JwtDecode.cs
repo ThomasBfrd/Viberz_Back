@@ -5,16 +5,15 @@ using Viberz.Application.DTO.Auth;
 
 namespace Viberz.Application.Utilities;
 
-public class JwtDecode(JwtSecurityTokenHandler jwtSecurityTokenHandler)
+public class JwtDecode()
 {
-    private readonly JwtSecurityTokenHandler _jwtSecurityTokenHandler = jwtSecurityTokenHandler;
-
     public UserJwtConnexion GetUserAuthInformations(string authorizationHeader)
     {
         string jwt = RemoveBearerPrefix(authorizationHeader) ??
             throw new Exception("Authorization header is missing or does not contain a Bearer token.");
 
-        var token = _jwtSecurityTokenHandler.ReadJwtToken(jwt) ?? throw new Exception("token manquant");
+        JwtSecurityTokenHandler handler = new();
+        var token = handler.ReadJwtToken(jwt) ?? throw new Exception("The JWT is not functionnal or some informations are missing.");
 
         return new()
         {

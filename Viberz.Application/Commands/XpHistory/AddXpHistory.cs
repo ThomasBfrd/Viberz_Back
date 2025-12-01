@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MediatR;
 using Viberz.Application.DTO.Xp;
-using Viberz.Domain.Entities;
+using Viberz.Application.Interfaces.XpHistory;
 using Viberz.Domain.Models;
 
 public class AddXpHistory : IRequest<UserXpDTO>
@@ -14,14 +14,16 @@ public class AddXpHistory : IRequest<UserXpDTO>
         XpHistory = xpHistory;
     }
 
-    public class  Handler : IRequestHandler<AddXpHistory, UserXpDTO>
+    public class Handler : IRequestHandler<AddXpHistory, UserXpDTO>
     {
+        private readonly IXpHistoryService _xpHistoryService;
         private readonly IXpHistoryRepository _xpHistoryRepository;
         private readonly IUserXp _userXp;
         private readonly IMapper _mapper;
 
-        public Handler(IXpHistoryRepository xpHistoryRepository, IUserXp userXp, IMapper mapper)
+        public Handler(IXpHistoryService xpHistoryService, IXpHistoryRepository xpHistoryRepository, IUserXp userXp, IMapper mapper)
         {
+            _xpHistoryService = xpHistoryService;
             _xpHistoryRepository = xpHistoryRepository;
             _userXp = userXp;
             _mapper = mapper;
@@ -41,7 +43,7 @@ public class AddXpHistory : IRequest<UserXpDTO>
 
             beforeUser.LevelUp = isLevelUp;
 
-            XpHistory history = await _xpHistoryRepository.AddHistoryGame(request.UserId, request.XpHistory, beforeUser, newTotal);
+            await _xpHistoryService.AddXpHistory(request.UserId, request.XpHistory, newTotal, beforeUser);
 
             UserXpInfo user = await _userXp.GetUserXp(request.UserId);
             user.LevelUp = isLevelUp;

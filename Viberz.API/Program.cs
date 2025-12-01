@@ -1,12 +1,15 @@
-﻿using Microsoft.OpenApi.Models;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.IdentityModel.Tokens.Jwt;
 using Viberz.API.Controllers;
+using Viberz.Application.Factory.GuessFactory;
 using Viberz.Application.Interfaces.Artists;
 using Viberz.Application.Interfaces.Genres;
 using Viberz.Application.Interfaces.Guess;
 using Viberz.Application.Interfaces.Spotify;
 using Viberz.Application.Interfaces.User;
+using Viberz.Application.Interfaces.XpHistory;
 using Viberz.Application.Queries.Artists;
 using Viberz.Application.Queries.Authentication;
 using Viberz.Application.Queries.Genres;
@@ -20,6 +23,7 @@ using Viberz.Application.Services.Spotify;
 using Viberz.Application.Services.Users;
 using Viberz.Application.Utilities;
 using Viberz.Infrastructure.Configuration;
+using Viberz.Infrastructure.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}");
@@ -37,8 +41,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "JWT Authorization header using the Bearer scheme."
     });
 
-    options.OperationFilter<SecurityRequirementsOperationFilter>();
-
     options.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -52,9 +54,8 @@ builder.Services.AddSwaggerGen(options =>
             },
             new string[] {}
         }
-
     });
-    
+
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
@@ -62,15 +63,17 @@ builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpClient();
 
 builder.Services.AddSingleton<JwtService>();
-builder.Services.AddSingleton<JwtSecurityTokenHandler>();
 builder.Services.AddSingleton<RedisService>();
-builder.Services.AddScoped<JwtDecode>();
+builder.Services.AddTransient<JwtSecurityTokenHandler>();
 builder.Services.AddScoped<ConvertImageToBase64>();
+builder.Services.AddScoped<JwtDecode>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGenresService, GenresService>();
 builder.Services.AddScoped<IArtistsService, ArtistsService>();
 builder.Services.AddScoped<ISpotifyService, SpotifyService>();
+builder.Services.AddScoped<IXpHistoryService, XpHistoryService>();
 builder.Services.AddScoped<IGuessService, GuessService>();
+builder.Services.AddScoped<GuessStrategyFactory>();
 
 builder.Services.AddMediatR(cfg =>
 {
@@ -114,6 +117,8 @@ builder.Services.AddAutoMapper(cfg =>
 
 WebApplication app = builder.Build();
 
+await ApplyMigrationAsync(app);
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -127,3 +132,40 @@ app.UseAuthorization();
 app.UseHttpsRedirection();
 app.MapControllers();
 app.Run();
+
+static async Task ApplyMigrationAsync(WebApplication app)
+{
+    using IServiceScope scope = app.Services.CreateScope();
+    IServiceProvider services = scope.ServiceProvider;
+    ILogger<Program> logger = services.GetRequiredService<ILogger<Program>>();
+
+    try
+    {
+        var context = services.GetRequiredService<ApplicationDbContext>();
+
+        logger.LogInformation("Applying database migrations...");
+
+        bool canConnect = await context.Database.CanConnectAsync();
+        if (!canConnect)
+        {
+            logger.LogWarning("Cannot connect to database - skipping migrations. Check database availability.");
+            return;
+        }
+
+        await context.Database.MigrateAsync();
+
+        logger.LogInformation("Database migrations applied successfully.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "An error occurred while applying database migrations.");
+
+        if (app.Environment.IsProduction())
+        {
+            logger.LogWarning("Skipping migrations due to database error. Application will start without migrations.");
+            return;
+        }
+
+        throw;
+    }
+}

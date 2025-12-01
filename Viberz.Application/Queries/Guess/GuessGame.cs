@@ -36,6 +36,8 @@ public class GuessGame : IRequestHandler<GuessQuery, RandomSongsDTO>
 
         if (genres is null) throw new Exception("Can't get genres");
 
+        List<GenresWithSpotifyId> otherGenres = genres;
+
         if (request.DefinedGenres is not null && request.DefinedGenres.Count > 0)
         {
             genres = genres.Where(g => request.DefinedGenres.Contains(g.Name)).ToList();
@@ -47,28 +49,23 @@ public class GuessGame : IRequestHandler<GuessQuery, RandomSongsDTO>
             int randomIndex = random.Next(genres.Count);
             string randomPlaylistId = genres[randomIndex].SpotifyId;
             string randomGenre = genres[randomIndex].Name;
-            List<string> randomOtherGenres = genres
-                .Select(a => a.Name)
-                .Where(g => request.GameType == Activies.GuessGenre ? !g.Equals(randomGenre) : g.Equals(randomGenre))
+            List<GenresWithSpotifyId> randomOtherGenres = otherGenres
+                .Where(g => !g.Name.Equals(randomGenre))
                 .ToList();
 
 
-            if (request.DefinedGenres is not null && request.DefinedGenres.Count > 0 && request.GameType == Activies.GuessSong)
+            if (request.DefinedGenres is not null && request.DefinedGenres.Count > 0)
             {
-                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, existingUser.User.Id, randomPlaylistId, randomGenre, null, genres, request.GameType);
+                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, existingUser.User.Id, randomPlaylistId, randomGenre, randomOtherGenres, request.GameType);
             } else
             {
-                List<string> otherGenres = TakeRandom.TakeRandomToList(randomOtherGenres, 3, random);
+                List<GenresWithSpotifyId> otherGenres = TakeRandom.TakeRandomToList(randomOtherGenres, 3, random);
 
-                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, existingUser.User.Id, randomPlaylistId, randomGenre, otherGenres, null, request.GameType);
+                return await _guessService.GetSongFromPlaylist(request.Token.SpotifyJwt, existingUser.User.Id, randomPlaylistId, randomGenre, otherGenres, request.GameType);
             }
         });
 
-        List<RandomSong> randomSongs = (await Task.WhenAll(randomSongsTasks))
-            .GroupBy(x => x.Song.Track.Id)
-            .Select(s => s.First())
-            .Take(5)
-            .ToList();
+        List<RandomSong> randomSongs = (await Task.WhenAll(randomSongsTasks)).ToList();
 
         return new() 
         { 
