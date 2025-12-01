@@ -1,27 +1,14 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Viberz.Domain.Entities;
 using Viberz.Infrastructure.Data;
+using Viberz.Infrastructure.Repositories;
 
-public class UserRepository : IUserRepository
+public class UserRepository(ApplicationDbContext context) : BaseRepository<User>(context), IUserRepository
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IMapper _mapper;
-    public UserRepository(ApplicationDbContext context, IMapper mapper)
-    {
-        _context = context;
-        _mapper = mapper;
-    }
+    private readonly ApplicationDbContext _context = context;
 
     public async Task<User?> GetUser(string userId)
         => await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
-
-    public async Task<User> AddUser(User user)
-    {
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-        return user;
-    }
 
     public async Task<User> UpdateUser(User user, string userId)
     {
@@ -34,7 +21,6 @@ public class UserRepository : IUserRepository
         existingUser.Username = user.Username ?? existingUser.Username;
         existingUser.Email = user.Email ?? existingUser.Email;
         existingUser.Image = user.Image ?? existingUser.Image;
-        existingUser.UserType = user.UserType ?? existingUser.UserType;
         existingUser.FavoriteArtists = user.FavoriteArtists ?? existingUser.FavoriteArtists;
         existingUser.FavoriteGenres = user.FavoriteGenres ?? existingUser.FavoriteGenres;
         existingUser.UpdatedAt = DateTime.UtcNow;
@@ -49,7 +35,8 @@ public class UserRepository : IUserRepository
         if (existingUser == null)
         {
             throw new Exception("User not found");
-        } else
+        }
+        else
         {
             _context.Users.Remove(existingUser);
 

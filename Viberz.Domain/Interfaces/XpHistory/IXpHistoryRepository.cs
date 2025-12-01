@@ -1,7 +1,7 @@
 ﻿using Viberz.Domain.Entities;
-using Viberz.Domain.Models;
+using Viberz.Domain.Interfaces;
 
-public interface IXpHistoryRepository
+public interface IXpHistoryRepository : IBaseRepository<XpHistory>
 {
-    Task<XpHistory> AddHistoryGame(string userId, AddXpHistoryGame historyGame, UserXpInfo user, int newTotal);
+
 }

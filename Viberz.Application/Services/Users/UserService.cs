@@ -54,12 +54,11 @@ public class UserService : IUserService
             Image = imageBase64,
             Email = userInfo.Email,
             Username = userInfo.Username ?? string.Empty,
-            UserType = "premium",
             FavoriteArtists = new List<string>(),
             FavoriteGenres = new List<string>()
         };
 
-        await _userRepository.AddUser(user);
+        await _userRepository.Add(user);
 
         return new UserDTO
         {
