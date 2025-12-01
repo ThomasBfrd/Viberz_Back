@@ -20,8 +20,6 @@ namespace Viberz.Application.Services.Redis
 
             _redis = ConnectionMultiplexer.Connect(options);
             _db = _redis.GetDatabase();
-
-            _db.StringSet("foo", "bar");
         }
 
         public void AddSongForUser(string userId, string trackId, int ttlMinutes = 3)
