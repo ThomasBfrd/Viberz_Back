@@ -1,9 +1,9 @@
 ﻿using Viberz.Domain.Entities;
+using Viberz.Domain.Interfaces;
 
-public interface IUserRepository
+public interface IUserRepository : IBaseRepository<User>
 {
     Task<User?> GetUser(string userId);
-    Task<User> AddUser(User user);
     Task<User> UpdateUser(User user, string userId);
     Task<bool> DeleteUser(string userId);
     Task<bool> CheckUserName(User user);

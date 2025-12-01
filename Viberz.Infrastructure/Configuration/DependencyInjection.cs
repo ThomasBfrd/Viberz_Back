@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Viberz.Domain.Interfaces;
 using Viberz.Domain.Interfaces.Genres;
 using Viberz.Infrastructure.Data;
+using Viberz.Infrastructure.Repositories;
 using Viberz.Infrastructure.Repositories.Genres;
 using Viberz.Infrastructure.Repositories.Xp;
 

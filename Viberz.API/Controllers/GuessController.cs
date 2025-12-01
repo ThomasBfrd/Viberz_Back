@@ -27,7 +27,7 @@ public class GuessController : ControllerBase
     public async Task<IActionResult> GetGuessSongsList([FromQuery] List<string>? definedGenre, [FromQuery] Activies gameType)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-            throw new Exception("UserId is missing in the JWT.");
+            throw new Exception("User informations are missing in the JWT.");
 
         RandomSongsDTO song = await _mediator.Send(new GuessQuery(token, definedGenre, gameType));
 

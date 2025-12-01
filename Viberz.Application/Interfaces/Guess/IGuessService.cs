@@ -7,6 +7,6 @@ namespace Viberz.Application.Interfaces.Guess;
 
 public interface IGuessService
 {
-    public Task<RandomSong> GetSongFromPlaylist(string token, string userId, string playlistId, string randomGenre, List<string>? otherRandomGenresName, List<GenresWithSpotifyId>? genres, Activies gameType);
+    public Task<RandomSong> GetSongFromPlaylist(string token, string userId, string playlistId, string randomGenre, List<GenresWithSpotifyId> genres, Activies gameType);
 }
 

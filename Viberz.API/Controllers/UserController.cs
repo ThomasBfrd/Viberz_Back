@@ -23,7 +23,7 @@ public class UserController(
     public async Task<IActionResult> GetUsers()
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-            throw new Exception("UserId is missing in the JWT.");
+            throw new Exception("User informations are missing in the JWT.");
 
         UserDTO? user = await _mediator.Send(new GetUserQuery(token.UserId));
 
@@ -40,7 +40,7 @@ public class UserController(
     public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO userToUpdate)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-        throw new Exception("Spotify access token is missing in the JWT.");
+        throw new Exception("User informations are missing in the JWT.");
 
         UserDTO user = await _mediator.Send(new UpdateUser(userToUpdate, token.UserId));
         return Ok(user);
@@ -50,7 +50,7 @@ public class UserController(
     public async Task<IActionResult> DeleteUser([FromBody] string userId)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-            throw new Exception("UserId is missing in the JWT.");
+            throw new Exception("User informations are missing in the JWT.");
 
         bool result = await _mediator.Send(new DeleteUser(token.UserId));
 

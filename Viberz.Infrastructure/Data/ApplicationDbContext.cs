@@ -14,7 +14,6 @@ namespace Viberz.Infrastructure.Data
         public DbSet<Genre> Genres { get; set; }
         public DbSet<XpHistory> XpHistories { get; set; }
         public DbSet<XpGrades> XpGrades { get; set; }
-
         public DbSet<Whitelist> Whitelist { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -54,8 +53,7 @@ namespace Viberz.Infrastructure.Data
             );
 
             modelBuilder.Entity<Whitelist>().HasData(
-                new Whitelist { Id = 1, Email = "thomas.bfrd@gmail.com" },
-                new Whitelist { Id = 2, Email = "micanille@hotmail.fr" }
+                new Whitelist { Id = 1, Email = "thomas.bfrd@gmail.com" }
             );
         }
     }

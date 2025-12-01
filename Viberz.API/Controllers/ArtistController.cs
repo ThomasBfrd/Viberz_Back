@@ -24,7 +24,7 @@ public class ArtistController : ControllerBase
     public async Task<IActionResult> GetArtistsFromSearch([FromQuery] string artist)
     {
         UserJwtConnexion token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-            throw new Exception("Spotify access token is missing in the JWT.");
+            throw new Exception("User informations are missing in the JWT.");
 
         List<ArtistSearchDTO> artists = await _mediator.Send(new GetArtistsQuery(token.SpotifyJwt, artist));
 

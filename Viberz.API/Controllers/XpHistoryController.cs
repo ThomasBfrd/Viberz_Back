@@ -24,7 +24,7 @@ public class XpHistoryController : ControllerBase
     public async Task<IActionResult> AddHistoryGame([FromBody] AddXpHistoryGame addXpHistoryGame)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
-            throw new Exception("UserId is missing in the JWT.");
+            throw new Exception("User informations are missing in the JWT.");
 
         UserXpDTO result = await _mediator.Send(new AddXpHistory(token.UserId, addXpHistoryGame));
 
