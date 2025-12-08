@@ -7,7 +7,7 @@ using Viberz.Application.Utilities;
 
 namespace Viberz.API.Controllers;
 
-[Route("api/search")]
+[Route("api/searchArtist")]
 [ApiController]
 public class ArtistController : ControllerBase
 {

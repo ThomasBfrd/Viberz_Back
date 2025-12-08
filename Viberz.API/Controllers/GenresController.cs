@@ -15,7 +15,7 @@ public class GenresController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpGet("getGenres")]
+    [HttpGet]
     public async Task<ActionResult<List<string>>> GetGenres()
     {
         List<string> result = await _mediator.Send(new GetGenresQuery());
