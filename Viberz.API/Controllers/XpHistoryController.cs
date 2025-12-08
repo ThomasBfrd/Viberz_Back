@@ -20,7 +20,7 @@ public class XpHistoryController : ControllerBase
         _mediator = mediator;
     }
 
-    [HttpPost("add-history-game")]
+    [HttpPost]
     public async Task<IActionResult> AddHistoryGame([FromBody] AddXpHistoryGame addXpHistoryGame)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??

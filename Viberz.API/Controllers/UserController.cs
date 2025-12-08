@@ -1,7 +1,6 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System.Security;
 using Viberz.Application.Commands.User;
 using Viberz.Application.DTO.Auth;
 using Viberz.Application.DTO.User;
@@ -19,13 +18,13 @@ public class UserController(
     private readonly JwtDecode _jwtDecode = jwtDecode;
     private readonly IMediator _mediator = mediator;
 
-    [HttpGet("me")]
-    public async Task<IActionResult> GetUsers()
+    [HttpGet]
+    public async Task<IActionResult> GetUser([FromHeader] string userId)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
             throw new Exception("User informations are missing in the JWT.");
 
-        UserDTO? user = await _mediator.Send(new GetUserQuery(token.UserId));
+        UserDTO? user = await _mediator.Send(new GetUserQuery(userId));
 
         if (user is null)
         {
@@ -36,7 +35,7 @@ public class UserController(
 
         return Ok(user);
     }
-    [HttpPut("me")]
+    [HttpPut]
     public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO userToUpdate)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
@@ -46,8 +45,8 @@ public class UserController(
         return Ok(user);
     }
 
-    [HttpDelete("me")]
-    public async Task<IActionResult> DeleteUser([FromBody] string userId)
+    [HttpDelete]
+    public async Task<IActionResult> DeleteUser()
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
             throw new Exception("User informations are missing in the JWT.");
