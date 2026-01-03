@@ -6,7 +6,7 @@ using Viberz.Application.Models;
 using Viberz.Application.Utilities;
 using Viberz.Domain.Enums;
 
-namespace Viberz.Application.Strategy;
+namespace Viberz.Application.Strategy.Guess;
 
 public class GuessSongStrategy : IGuessStrategy
 {
@@ -36,7 +36,7 @@ public class GuessSongStrategy : IGuessStrategy
         {
             List<GenresWithSpotifyId> randomGenres = TakeRandom.TakeRandomToList(otherGenres, 1, random);
 
-            SongFromSpotifyPlaylistDTO? otherRandomSongs = await _spotifyService.GetSongsPropsFromPlaylist(token, randomGenres[0].SpotifyId);
+            SongFromSpotifyPlaylistDTO? otherRandomSongs = await _spotifyService.GetSongFromSpotifyPlaylist(token, randomGenres[0].SpotifyId);
 
             if (otherRandomSongs?.Tracks.Items is null || otherRandomSongs.Tracks.Items.Count == 0)
                 throw new Exception("No songs found in the playlist");

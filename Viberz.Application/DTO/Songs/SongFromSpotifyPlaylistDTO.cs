@@ -4,6 +4,7 @@ namespace Viberz.Application.DTO.Songs;
 
 public class SongFromSpotifyPlaylistDTO
 {
+    public required List<ImageDto> Images { get; set; }
     public required TracksDto Tracks { get; set; }
 }
 
@@ -35,8 +36,8 @@ public class AlbumDto
 public class ImageDto
 {
     public required string Url { get; set; }
-    public int Height { get; set; }
-    public int Width { get; set; }
+    public int? Height { get; set; }
+    public int? Width { get; set; }
 }
 
 public class ArtistDto
