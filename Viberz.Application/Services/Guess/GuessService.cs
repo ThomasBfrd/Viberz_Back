@@ -25,7 +25,7 @@ public class GuessService : IGuessService
     public async Task<RandomSong> GetSongFromPlaylist(string token, string userId, string playlistId, string randomGenre, List<GenresWithSpotifyId> otherGenres, Activies gameType)
     {
         Random random = new();
-        SongFromSpotifyPlaylistDTO? songList = await _spotifyService.GetSongsPropsFromPlaylist(token, playlistId);
+        SongFromSpotifyPlaylistDTO? songList = await _spotifyService.GetSongFromSpotifyPlaylist(token, playlistId);
 
         if (songList?.Tracks.Items is null || songList.Tracks.Items.Count == 0)
         {

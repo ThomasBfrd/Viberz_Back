@@ -43,19 +43,12 @@ public class UserService : IUserService
             }
         }
 
-        if (userInfo.UserProduct != "premium")
-            throw new Exception("You must have a premium account to use Viberz.");
-
         User user = new()
         {
             Id = userInfo.Id,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
             Image = imageBase64,
             Email = userInfo.Email,
             Username = userInfo.Username ?? string.Empty,
-            FavoriteArtists = new List<string>(),
-            FavoriteGenres = new List<string>()
         };
 
         await _userRepository.Add(user);

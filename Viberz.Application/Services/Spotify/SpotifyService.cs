@@ -23,15 +23,8 @@ public class SpotifyService : ISpotifyService
 
     public async Task<SpotifyTokenDTO?> ExchangeSpotifyToken(SpotifyAuthCodeRequestDTO spotifyAuthCodeRequest)
     {
-        string clientId = _configuration["Spotify:ClientId"] ?? string.Empty;
-        string clientSecret = _configuration["Spotify:ClientSecret"] ?? string.Empty;
+        HttpRequestMessage request = CreateAuthorizationHeader();
 
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
-
-        string basicAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
-
-        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
-         
         Dictionary<string, string> content = new()
         {
             { "grant_type", "authorization_code" },
@@ -59,13 +52,7 @@ public class SpotifyService : ISpotifyService
 
     public async Task<SpotifyTokenDTO?> RefreshSpotifyToken(RefreshSpotifyTokenDTO refreshSpotifyTokenDTO)
     {
-        string clientId = _configuration["Spotify:ClientId"] ?? string.Empty;
-        string clientSecret = _configuration["Spotify:ClientSecret"] ?? string.Empty;
-
-        HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
-
-        string basicAuth = Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"));
-        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", basicAuth);
+        HttpRequestMessage request = CreateAuthorizationHeader();
 
         Dictionary<string, string> content = new()
         {
@@ -115,18 +102,57 @@ public class SpotifyService : ISpotifyService
             throw new Exception("Failed to deserialize the user profile");
         }
 
-        if (userProfile.UserProduct != "premium")
-        {
-            throw new Exception("You must have a premium account to use Viberz.");
-        }
-
         return userProfile;
     }
 
-    public async Task<SongFromSpotifyPlaylistDTO> GetSongsPropsFromPlaylist(string spotifyJwt, string playlistId)
+    public HttpRequestMessage CreateAuthorizationHeader()
     {
-        HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(playlistId)}?fields=tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
-        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", spotifyJwt);
+        string clientId = _configuration["Spotify:ClientId"] ?? string.Empty;
+        string clientSecret = _configuration["Spotify:ClientSecret"] ?? string.Empty;
+
+        var request = new HttpRequestMessage(HttpMethod.Post, "https://accounts.spotify.com/api/token");
+        request.Headers.Authorization = new AuthenticationHeaderValue(
+            "Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes($"{clientId}:{clientSecret}"))
+        );
+
+        return request;
+    }
+
+    public async Task<string> GetAppAccessToken()
+    {
+
+        HttpRequestMessage request = CreateAuthorizationHeader();
+
+        request.Content = new FormUrlEncodedContent(new[]
+        {
+        new KeyValuePair<string, string>("grant_type", "client_credentials")
+    });
+
+        var response = await _httpClient.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+
+        var json = await response.Content.ReadAsStringAsync();
+        Dictionary<string, object>? tokenResponse = JsonSerializer.Deserialize<Dictionary<string, object>>(json);
+
+        if (tokenResponse == null || !tokenResponse.ContainsKey("access_token")) throw new Exception("Failed to retrieve access token from Spotify.");
+
+        return tokenResponse["access_token"].ToString() ?? "";
+    }
+
+    public async Task<SongFromSpotifyPlaylistDTO> GetSongFromSpotifyPlaylist(string? spotifyJwt, string playlistId)
+    {
+        string token;
+        if (!string.IsNullOrEmpty(spotifyJwt))
+        {
+            token = spotifyJwt;
+        }
+        else
+        {
+            token = await GetAppAccessToken();
+        }
+
+        HttpRequestMessage request = new(HttpMethod.Get, $"https://api.spotify.com/v1/playlists/{Uri.UnescapeDataString(playlistId)}?fields=+images%28url%29%2C+tracks%28items%28track%28album%28name%2Cimages%29%2Cname%2Cid%2C+duration_ms%2Cartists%28id%2Cname%29%29%29%29");
+        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
         HttpResponseMessage response = await _httpClient.SendAsync(request);
 
