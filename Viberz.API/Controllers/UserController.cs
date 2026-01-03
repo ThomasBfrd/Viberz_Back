@@ -26,15 +26,22 @@ public class UserController(
 
         UserDTO? user = await _mediator.Send(new GetUserQuery(userId));
 
-        if (user is null)
+        if (user is null && userId == token.UserId)
         {
-            UserDTO newUser = await _mediator.Send(new CreateUser(token.SpotifyJwt));
-
-            return Ok(newUser);
+            return CreateUser(token.SpotifyJwt).Result;
         }
 
         return Ok(user);
     }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateUser([FromBody] string spotifyJwt)
+    {
+        UserDTO user = await _mediator.Send(new CreateUser(spotifyJwt));
+
+        return Ok(user);
+    }
+
     [HttpPut]
     public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO userToUpdate)
     {

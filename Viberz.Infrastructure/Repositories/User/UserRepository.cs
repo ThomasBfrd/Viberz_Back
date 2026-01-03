@@ -3,7 +3,7 @@ using Viberz.Domain.Entities;
 using Viberz.Infrastructure.Data;
 using Viberz.Infrastructure.Repositories;
 
-public class UserRepository(ApplicationDbContext context) : BaseRepository<User>(context), IUserRepository
+public class UserRepository(ApplicationDbContext context) : BaseRepository<User, string>(context), IUserRepository
 {
     private readonly ApplicationDbContext _context = context;
 

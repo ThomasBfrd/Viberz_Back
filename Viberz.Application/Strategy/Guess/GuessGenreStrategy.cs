@@ -4,7 +4,7 @@ using Viberz.Application.Interfaces.Strategy;
 using Viberz.Application.Models;
 using Viberz.Domain.Enums;
 
-namespace Viberz.Application.Strategy;
+namespace Viberz.Application.Strategy.Guess;
 
 public class GuessGenreStrategy : IGuessStrategy
 {

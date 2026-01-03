@@ -2,11 +2,12 @@
 {
     public class Playlist
     {
-        // Id/Name/Created-Updated/Owner/Songs fournis par Spotify
         public int Id { get; set; }
         public string SpotifyPlaylistId { get; set; } = string.Empty;
-        public int UserId { get; set; }
-        public User User { get; set; } = new User();
-        public List<User> LikedByUsers { get; set; } = new List<User>();
+        public string UserId { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public List<string> GenreList { get; set; } = [];
+        public int Likes { get; set; } = 0;
+        public string ImageUrl { get; set; } = string.Empty;
     }
 }

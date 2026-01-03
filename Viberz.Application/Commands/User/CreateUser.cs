@@ -10,7 +10,6 @@ public class CreateUser : IRequest<UserDTO>
         AccessToken = accessToken;
     }
 
-    // Le Handler interne gère toute la logique métier
     public class Handler : IRequestHandler<CreateUser, UserDTO>
     {
         // Injection des dépendances nécessaires

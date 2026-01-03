@@ -1,9 +1,8 @@
-﻿using Viberz.Application.DTO.Xp;
-using Viberz.Application.Interfaces.XpHistory;
+﻿using Viberz.Application.Interfaces.XpHistory;
 using Viberz.Domain.Entities;
 using Viberz.Domain.Models;
 
-public class XpHistoryService(IXpHistoryRepository xpHistoryRepository, IUserXp userXpService) : IXpHistoryService
+public class XpHistoryService(IXpHistoryRepository xpHistoryRepository) : IXpHistoryService
 {
     IXpHistoryRepository _xpHistoryRepository = xpHistoryRepository;
     public async Task AddXpHistory(string userId, AddXpHistoryGame xpHistory, int newTotal, UserXpInfo beforeUser)

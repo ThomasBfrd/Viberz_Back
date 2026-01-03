@@ -12,6 +12,8 @@ namespace Viberz.Infrastructure.Data
 
         public DbSet<User> Users { get; set; }
         public DbSet<Genre> Genres { get; set; }
+        public DbSet<Playlist> Playlists { get; set; }
+        public DbSet<LikedPlaylists> LikedPlaylists { get; set; }
         public DbSet<XpHistory> XpHistories { get; set; }
         public DbSet<XpGrades> XpGrades { get; set; }
         public DbSet<Whitelist> Whitelist { get; set; }

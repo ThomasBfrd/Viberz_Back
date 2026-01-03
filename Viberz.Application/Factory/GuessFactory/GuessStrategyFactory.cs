@@ -1,6 +1,6 @@
 ﻿using Viberz.Application.Interfaces.Spotify;
 using Viberz.Application.Interfaces.Strategy;
-using Viberz.Application.Strategy;
+using Viberz.Application.Strategy.Guess;
 using Viberz.Domain.Enums;
 
 namespace Viberz.Application.Factory.GuessFactory;

@@ -1,12 +1,15 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.IdentityModel.Tokens.Jwt;
 using Viberz.API.Controllers;
 using Viberz.Application.Factory.GuessFactory;
+using Viberz.Application.Factory.PlaylistFactory;
 using Viberz.Application.Interfaces.Artists;
 using Viberz.Application.Interfaces.Genres;
 using Viberz.Application.Interfaces.Guess;
+using Viberz.Application.Interfaces.Playlist;
 using Viberz.Application.Interfaces.Spotify;
 using Viberz.Application.Interfaces.User;
 using Viberz.Application.Interfaces.XpHistory;
@@ -18,6 +21,7 @@ using Viberz.Application.Services.Artists;
 using Viberz.Application.Services.Authentification;
 using Viberz.Application.Services.Genres;
 using Viberz.Application.Services.GuessGenre;
+using Viberz.Application.Services.Playlists;
 using Viberz.Application.Services.Redis;
 using Viberz.Application.Services.Spotify;
 using Viberz.Application.Services.Users;
@@ -59,6 +63,15 @@ builder.Services.AddSwaggerGen(options =>
     options.OperationFilter<SecurityRequirementsOperationFilter>();
 });
 
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddFixedWindowLimiter("fixed", opt =>
+    {
+        opt.Window = TimeSpan.FromSeconds(10);
+        opt.PermitLimit = 5;
+    });
+});
+
 builder.Services.AddInfrastructureServices(builder.Configuration);
 builder.Services.AddHttpClient();
 
@@ -73,7 +86,9 @@ builder.Services.AddScoped<IArtistsService, ArtistsService>();
 builder.Services.AddScoped<ISpotifyService, SpotifyService>();
 builder.Services.AddScoped<IXpHistoryService, XpHistoryService>();
 builder.Services.AddScoped<IGuessService, GuessService>();
+builder.Services.AddScoped<IPlaylistService, PlaylistService>();
 builder.Services.AddScoped<GuessStrategyFactory>();
+builder.Services.AddScoped<PlaylistStrategyFactory>();
 
 builder.Services.AddMediatR(cfg =>
 {

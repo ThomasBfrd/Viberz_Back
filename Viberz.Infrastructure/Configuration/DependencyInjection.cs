@@ -3,6 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Viberz.Domain.Interfaces;
 using Viberz.Domain.Interfaces.Genres;
+using Viberz.Domain.Interfaces.LikedPlaylistRepository;
 using Viberz.Infrastructure.Data;
 using Viberz.Infrastructure.Repositories;
 using Viberz.Infrastructure.Repositories.Genres;
@@ -26,6 +27,8 @@ public static class DependencyInjection
         services.AddScoped<IUserRepository, UserRepository>();
         services.AddScoped<IXpHistoryRepository, XpHistoryRepository>();
         services.AddScoped<IGenresRepository, GenresRepository>();
+        services.AddScoped<IPlaylistRepository, PlaylistRepository>();
+        services.AddScoped<ILikedPlaylistsRepository, LikedPlaylistsRepository>();
 
         return services;
     }

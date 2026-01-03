@@ -10,5 +10,6 @@ public interface ISpotifyService
     public Task<SpotifyTokenDTO?> ExchangeSpotifyToken(SpotifyAuthCodeRequestDTO spotifyAuthCodeRequest);
     public Task<SpotifyTokenDTO?> RefreshSpotifyToken(RefreshSpotifyTokenDTO refreshSpotifyTokenDTO);
     public Task<UserSpotifyInformationsDTO> GetUserSpotifyInformations(string accessToken);
-    public Task<SongFromSpotifyPlaylistDTO> GetSongsPropsFromPlaylist(string spotifyJwt, string playlistId);
+    public Task<SongFromSpotifyPlaylistDTO> GetSongFromSpotifyPlaylist(string? token, string playlistId);
+    public Task<string> GetAppAccessToken();
 }
