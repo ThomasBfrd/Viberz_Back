@@ -1,5 +1,4 @@
 ﻿using Viberz.Application.DTO.User;
-using Viberz.Domain.Entities;
 
 namespace Viberz.Application.Interfaces.User;
 

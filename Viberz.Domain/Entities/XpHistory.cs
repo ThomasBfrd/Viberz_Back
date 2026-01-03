@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using Viberz.Domain.Enums;
+﻿using Viberz.Domain.Enums;
 
 namespace Viberz.Domain.Entities;
 

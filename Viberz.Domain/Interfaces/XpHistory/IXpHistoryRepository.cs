@@ -1,7 +1,7 @@
 ﻿using Viberz.Domain.Entities;
 using Viberz.Domain.Interfaces;
 
-public interface IXpHistoryRepository : IBaseRepository<XpHistory>
+public interface IXpHistoryRepository : IBaseRepository<XpHistory, int>
 {
 
 }
