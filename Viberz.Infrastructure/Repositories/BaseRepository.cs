@@ -3,7 +3,7 @@ using Viberz.Infrastructure.Data;
 
 namespace Viberz.Infrastructure.Repositories;
 
-public abstract class BaseRepository<T>(ApplicationDbContext context)
+public abstract class BaseRepository<T, TId>(ApplicationDbContext context)
        where T : class
 {
     private readonly ApplicationDbContext _context = context;
@@ -13,5 +13,16 @@ public abstract class BaseRepository<T>(ApplicationDbContext context)
     {
         await DbSet.AddAsync(entity);
         await _context.SaveChangesAsync();
+    }
+
+    public async Task Delete(T entity)
+    {
+        DbSet.Remove(entity);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<T?> GetByIdAsync(TId id)
+    {
+        return await DbSet.FindAsync(id);
     }
 }
