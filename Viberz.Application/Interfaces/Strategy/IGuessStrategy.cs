@@ -9,7 +9,6 @@ public interface IGuessStrategy
     Task<RandomSong> BuildResult
     (
         string token,
-        string userId,
         ItemDto randomSongFromPlaylist,
         string genre,
         List<GenresWithSpotifyId> genres

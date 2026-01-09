@@ -1,5 +1,4 @@
-﻿using Viberz.Application.DTO.Auth;
-using Viberz.Application.DTO.Genres;
+﻿using Viberz.Application.DTO.Genres;
 using Viberz.Application.Models;
 using Viberz.Domain.Enums;
 
@@ -7,6 +6,6 @@ namespace Viberz.Application.Interfaces.Guess;
 
 public interface IGuessService
 {
-    public Task<RandomSong> GetSongFromPlaylist(string token, string userId, string playlistId, string randomGenre, List<GenresWithSpotifyId> genres, Activies gameType);
+    public Task<RandomSong> GetSongFromPlaylist(string token, string userId, Profile profile, string playlistId, string randomGenre, List<GenresWithSpotifyId> genres, Activies gameType);
 }
 

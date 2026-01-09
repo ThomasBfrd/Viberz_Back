@@ -6,4 +6,5 @@ public interface IGenresRepository
 {
     public Task<List<string>> GetAllGenres();
     public Task<List<Genre>> GetAllGenresWithSpotifyId();
+    public Task<List<Genre>> GetAllGuestGenresWithSpotifyId();
 }

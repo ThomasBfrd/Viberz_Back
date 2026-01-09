@@ -19,19 +19,11 @@ public class GetSpotifyToken : IRequestHandler<GetSpotifyTokenQuery, AuthConnexi
     }
     public async Task<AuthConnexionDTO> Handle(GetSpotifyTokenQuery request, CancellationToken cancellationToken)
     {
-        SpotifyTokenDTO? tokens = await _spotifyAuthService.ExchangeSpotifyToken(request.SpotifyAuthCodeRequest);
-
-        if (tokens == null)
-        {
+        SpotifyTokenDTO? tokens = await _spotifyAuthService.ExchangeSpotifyToken(request.SpotifyAuthCodeRequest) ??
             throw new Exception("Failed to exchange Spotify token.");
-        }
 
-        UserSpotifyInformationsDTO user = await _spotifyAuthService.GetUserSpotifyInformations(tokens.AccessToken);
-
-        if (user == null)
-        {
+        UserSpotifyInformationsDTO user = await _spotifyAuthService.GetUserSpotifyInformations(tokens.AccessToken) ?? 
             throw new Exception("Failed to retrieve Spotify user profile.");
-        }
 
         string jwt = _jwtService.GenerateToken(user.Id, tokens.AccessToken);
 

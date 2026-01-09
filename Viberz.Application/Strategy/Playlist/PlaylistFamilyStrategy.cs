@@ -29,16 +29,20 @@ public class PlaylistFamilyStrategy(
         List<PlaylistDTO> result = [];
 
         foreach (PlaylistDTO playlist in existingPlaylists) {
+            bool isLikedByUser = false;
+            if (userId.Length > 0)
+            {
+                UserDTO? user = await _userService.GetUserById(userId) ??
+                    throw new Exception("User not found");
 
-            UserDTO? user = await _userService.GetUserById(userId) ??
-                throw new Exception("User not found");
+                isLikedByUser = await _likedPlaylistsRepository.IsPlaylistLikedAsync(playlist.Id, user.User.Id);
+            }
 
             UserDTO? playlistOwner = await _userService.GetUserById(playlist.UserId) ??
                     throw new Exception("Owner of this playlist not found");
 
             if (playlistOwner.User.Username is null) throw new ArgumentException("The user doesn't have a proper username");
 
-            bool isLikedByUser = await _likedPlaylistsRepository.IsPlaylistLikedAsync(playlist.Id, user.User.Id);
 
             playlist.LikedByUser = isLikedByUser;
             playlist.UserName = playlistOwner.User.Username;

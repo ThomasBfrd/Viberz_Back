@@ -16,11 +16,16 @@ public class GenresRepository : IGenresRepository
 
     public async Task<List<string>> GetAllGenres()
     {
-        return await _context.Genres.Select(g => g.Name).ToListAsync();
+        return await _context.Genres.Where(g => !g.IsGuestGenre).Select(g => g.Name).ToListAsync();
     }
 
     public async Task<List<Genre>> GetAllGenresWithSpotifyId()
     {
-        return await _context.Genres.ToListAsync();
+        return await _context.Genres.Where(g => !g.IsGuestGenre).ToListAsync();
+    }
+
+    public async Task<List<Genre>> GetAllGuestGenresWithSpotifyId()
+    {
+        return await _context.Genres.Where(g => g.IsGuestGenre).ToListAsync();
     }
 }

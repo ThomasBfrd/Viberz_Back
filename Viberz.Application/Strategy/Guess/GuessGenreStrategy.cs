@@ -11,7 +11,6 @@ public class GuessGenreStrategy : IGuessStrategy
     public async Task<RandomSong> BuildResult
     (
         string token,
-        string userId,
         ItemDto randomSongFromPlaylist,
         string genre,
         List<GenresWithSpotifyId> otherGenres

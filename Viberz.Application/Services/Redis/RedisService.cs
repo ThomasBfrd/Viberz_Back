@@ -2,6 +2,7 @@
 using StackExchange.Redis;
 using System.Text.Json;
 using Viberz.Application.DTO.Songs;
+using Viberz.Domain.Enums;
 
 namespace Viberz.Application.Services.Redis
 {
@@ -24,9 +25,9 @@ namespace Viberz.Application.Services.Redis
             _db = _redis.GetDatabase();
         }
 
-        public void AddSongForUser(string userId, string trackId, int ttlMinutes = 3)
+        public void AddSongForUser(string userId, string trackId, Activies context, int ttlMinutes)
         {
-            string key = $"user:{userId}:recentSongs";
+            string key = $"user:{userId}:{context}:recentSongs";
             _db.SetAdd(key, trackId);
             _db.KeyExpire(key, TimeSpan.FromMinutes(ttlMinutes));
         }
@@ -48,9 +49,9 @@ namespace Viberz.Application.Services.Redis
             return JsonSerializer.Deserialize<SongFromSpotifyPlaylistDTO>(cachedData, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
-        public bool SongAlreadyPlayed(string userId, string trackId)
+        public bool SongAlreadyPlayed(string userId, string trackId, Activies context)
         {
-            string key = $"user:{userId}:recentSongs";
+            string key = $"user:{userId}:{context}:recentSongs";
             return _db.SetContains(key, trackId);
         }
 
