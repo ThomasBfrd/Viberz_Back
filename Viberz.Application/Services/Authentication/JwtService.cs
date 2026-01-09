@@ -17,18 +17,18 @@ namespace Viberz.Application.Services.Authentification
             _tokenHandler = tokenHandler;
         }
 
-        public string GenerateToken(string userId, string spotifyAccessToken)
+        public string GenerateToken(string? userId = null, string? spotifyAccessToken = null)
         {
-            var claims = new[]
+            Claim[] claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, userId),
-                new Claim("spotify_access_token", spotifyAccessToken)
+                new Claim(JwtRegisteredClaimNames.Sub, userId ?? ""),
+                new Claim("spotify_access_token", spotifyAccessToken ?? "")
             };
 
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"] ?? string.Empty));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+            SymmetricSecurityKey key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Secret"] ?? string.Empty));
+            SigningCredentials creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-            var token = new JwtSecurityToken(
+            JwtSecurityToken token = new JwtSecurityToken(
                 issuer: _configuration["Jwt:Issuer"],
                 audience: _configuration["Jwt:Audience"],
                 claims: claims,

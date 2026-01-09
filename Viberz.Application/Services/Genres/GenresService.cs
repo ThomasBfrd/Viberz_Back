@@ -30,4 +30,11 @@ public class GenresService : IGenresService
 
         return genresDto;
     }
+
+    public async Task<List<GenresWithSpotifyId>> GetAllGuestGenresWithSpotifyId()
+    {
+        List<Genre> genres = await _genresRepository.GetAllGuestGenresWithSpotifyId();
+        List<GenresWithSpotifyId> genresDto = _mapper.Map<List<GenresWithSpotifyId>>(genres);
+        return genresDto;
+    }
 }

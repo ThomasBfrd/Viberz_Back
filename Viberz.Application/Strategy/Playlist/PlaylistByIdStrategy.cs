@@ -30,8 +30,15 @@ public class PlaylistByIdStrategy(
         Playlist playlist = await _playlistRepository.GetByIdAsync(playlistId.Value) ??
             throw new ArgumentException("The given playlistId does not exist");
 
-        UserDTO? user = await _userService.GetUserById(userId) ?? 
-            throw new Exception("User not found");
+        bool isLikedByUser = false;
+
+        if (userId.Length > 0)
+        {
+            UserDTO? user = await _userService.GetUserById(userId) ?? 
+                throw new Exception("User not found");
+
+            isLikedByUser = await _likedPlaylistsRepository.IsPlaylistLikedAsync(playlist.Id, user.User.Id);
+        }
 
         PlaylistDTO existingPlaylists = _mapper.Map<PlaylistDTO>(playlist);
         SongFromSpotifyPlaylistDTO spotifyPlaylist;
@@ -46,11 +53,8 @@ public class PlaylistByIdStrategy(
             _redisService.AddPlaylist(existingPlaylists.SpotifyPlaylistId, spotifyPlaylist);
         }
 
-
         if (spotifyPlaylist is null || spotifyPlaylist.Tracks.Items.Count == 0)
             throw new ArgumentException("The given playlistId from Spotify does not exist or has no songs");
-
-        bool isLikedByUser = await _likedPlaylistsRepository.IsPlaylistLikedAsync(playlist.Id, user.User.Id);
 
         UserDTO? playlistOwner = await _userService.GetUserById(playlist.UserId) ??
                     throw new Exception("Owner of this playlist not found");

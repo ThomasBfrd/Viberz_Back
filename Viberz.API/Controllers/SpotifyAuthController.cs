@@ -26,4 +26,16 @@ public class SpotifyAuthController : ControllerBase
     {
         return Ok(await _mediator.Send(new RefreshSpotifyTokenQuery(refreshSpotifyTokenDTO)));
     }
+
+    [HttpPost("getGuestAccess")]
+    public async Task<IActionResult> GetGenericAccessToken([FromBody] GenericAuthRequestDTO genericAuthRequest)
+    {
+        return Ok(await _mediator.Send(new GetGenericSpotifyTokenQuery(genericAuthRequest)));
+    }
+
+    [HttpPost("refreshGuestAccess")]
+    public async Task<IActionResult> RefreshGuestToken([FromBody] RefreshSpotifyTokenDTO refreshSpotifyTokenDTO)
+    {
+        return Ok(await _mediator.Send(new RefreshSpotifyTokenQuery(refreshSpotifyTokenDTO)));
+    }
 }
