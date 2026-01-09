@@ -20,22 +20,30 @@ This API handles authentication, Spotify integration, user progression, and game
 - Points and XP system
 - Game history tracking
 
-### 👤 Gestion Utilisateurs
+### 🎶 Discover
+- **Explore Public Playlists**: Browse community-curated and user-submitted Spotify playlists
+- **Playlist Submission**: Users can submit their own playlists
+- **Genre Filtering**: Filter playlists by EDM subgenres
+- **Playlist Interaction**: Like your favorite playlists
+- **Top Playlists**: View the most liked playlists
+
+### 👤 User Management
 - User profiles
 - XP-based progression and ranks
 - Top artists and favorite genres via Spotify API
 - XP history tracking
 
-### 🔐 Authentification
+### 🔐 Authentication
 - JWT token-based authentication
 - Spotify OAuth integration
 - Refresh token mechanism
 - User whitelist management
+- Guest access
 
 ### 📊 Cache & Performance
 - Redis caching for randomized **Guess** game sessions
 
-## 🛠️ Stack Technique
+## 🛠️ Technique Stack
 - .NET 9.0
 - Entity Framework Core (ORM)
 - PostgreSQL
@@ -58,13 +66,13 @@ The project follows **Clean Architecture** principles with a clear separation of
 - **Strategy Pattern** for different game modes
 - **Factory Pattern** for strategy instantiation
 
-### 📋 Prérequis
+### 📋 Prerequisites
 - .NET 9.0 SDK or higher
 - PostgreSQL 14+
 - Redis (local or cloud)
 - Spotify Developer account
 
-## 🔧 Installation
+## 🔧 Get Started
 
 1. **Clone the repository**
 ```bash
@@ -77,7 +85,7 @@ cd viberz-back
 dotnet restore
 ```
 
-3. **Configure environment variables** (see next section)
+3. **Configure your environment variables** (see next section)
 
 4. **Run the application**
 ```bash
@@ -142,35 +150,44 @@ createdb viberz
 ```
 **Note** : Migrations are applied automatically at startup via `Program.cs`.  
 
-**Whitelist utilisateurs** : Add allowed Spotify emails manually in the `whitelist` table.
+**Whitelist users** : Add allowed Spotify emails manually in the `whitelist` table.
 
 ## 📡 Main Endpoints
 
 ### Authentication
-- `POST /api/auth/login` - User login
-- `POST /api/auth/refresh` - Refresh token
-- `POST /api/auth/spotify/exchange` - Exchange Spotify code
+- `POST /api/authentication/getSpotifyAccess` - Spotify User login
+- `POST /api/authentication/getGuestAccess` - Guest User login
+- `POST /api/authentication/refreshSpotifyAccess` - Spotify Refresh Token
+- `POST /api/authentication/refreshGuestAccess` - Guest User login
 
 ### User
-- `GET /api/user/profile` - Get user profile
-- `PUT /api/user/profile` - Update profile
-- `GET /api/user/stats` - User stats
+- `POST /api/user` - Create profile
+- `GET /api/user` - Get user profile
+- `PUT /api/user` - Update profile
+- `DELETE /api/user` - Delete profile
+
+### Playlist
+- `POST /api/playlist/like` - Like playlist
+- `POST /api/playlist` - Create playlist
+- `GET /api/playlist` - Get playlist
+- `PUT /api/playlist` - Update playlist
+- `DELETE /api/playlist` - Delete playlist
 
 ### Guess Game
-- `GET /api/guess?gameType={type}&definedGenre={genres}` - Start a game
+- `GET /api/guess?profile={profile}&gameType={type}&definedGenre={genres}` - Start a game
 
 ### Xp History
-- `GET /api/xp-history/add-history-game` - Retrieve XP from games
+- `GET /api/xp-history/xp-history` - Retrieve XP from games
 
 ### Artists & Genres
-- `GET /api/artists/top` - Top artists
+- `GET /api/searchArtist` - Search artists from Spotify
 - `GET /api/genres` - Genres list
 
 ## 📄 License
 
 This project is licensed under the MIT License – see [LICENSE](LICENSE) for details.
 
-## ⚠️ Notes Importantes
+## ⚠️ Important Notes
 
 Portfolio project with limitations:
 - Spotify API: Maximum 25 users (manually added)
