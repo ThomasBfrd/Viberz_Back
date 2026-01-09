@@ -22,7 +22,7 @@ public class GuessService : IGuessService
         _redisService = redisService;
         _strategyFactory = guessStrategyFactory;
     }
-    public async Task<RandomSong> GetSongFromPlaylist(string token, string userId, string playlistId, string randomGenre, List<GenresWithSpotifyId> otherGenres, Activies gameType)
+    public async Task<RandomSong> GetSongFromPlaylist(string token, string userId, Profile profile, string playlistId, string randomGenre, List<GenresWithSpotifyId> otherGenres, Activies gameType)
     {
         Random random = new();
         SongFromSpotifyPlaylistDTO? songList = await _spotifyService.GetSongFromSpotifyPlaylist(token, playlistId);
@@ -38,12 +38,12 @@ public class GuessService : IGuessService
         {
             randomSongFromPlaylist = TakeRandom.TakeRandomToList(songList.Tracks.Items, 1, random);
         }
-        while (_redisService.SongAlreadyPlayed(userId, randomSongFromPlaylist[0].Track.Id));
+        while (_redisService.SongAlreadyPlayed(userId, randomSongFromPlaylist[0].Track.Id, gameType));
 
-        _redisService.AddSongForUser(userId, randomSongFromPlaylist[0].Track.Id);
+        _redisService.AddSongForUser(userId, randomSongFromPlaylist[0].Track.Id, gameType, profile.Equals("Guest") ? 1 : 2);
 
         IGuessStrategy strategy = _strategyFactory?.GetStrategy(gameType)!;
 
-        return await strategy.BuildResult(token, userId, randomSongFromPlaylist[0], randomGenre, otherGenres);
+        return await strategy.BuildResult(token, randomSongFromPlaylist[0], randomGenre, otherGenres);
     }
 }

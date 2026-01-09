@@ -30,11 +30,15 @@ public class PlaylistGenericStrategy(
 
         foreach (PlaylistDTO playlist in existingPlaylists)
         {
+            bool isLikedByUser = false;
 
-            UserDTO? user = await _userService.GetUserById(userId) ??
-                throw new Exception("User not found");
+            if (userId.Length > 0)
+            {
+                UserDTO? user = await _userService.GetUserById(userId) ??
+                    throw new Exception("User not found");
 
-            bool isLikedByUser = await _likedPlaylistsRepository.IsPlaylistLikedAsync(playlist.Id, user.User.Id);
+                isLikedByUser = await _likedPlaylistsRepository.IsPlaylistLikedAsync(playlist.Id, user.User.Id);
+            }
 
             UserDTO? playlistOwner = await _userService.GetUserById(playlist.UserId) ??
                 throw new Exception("Owner of this playlist not found");

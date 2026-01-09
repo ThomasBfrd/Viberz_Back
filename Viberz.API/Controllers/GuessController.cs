@@ -24,12 +24,18 @@ public class GuessController : ControllerBase
     [HttpGet]
     [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(RandomSongsDTO))]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> GetGuessSongsList([FromQuery] List<string>? definedGenre, [FromQuery] Activies gameType)
+    public async Task<IActionResult> GetGuessSongsList([FromQuery] List<string>? definedGenre, [FromQuery] Profile profile, [FromQuery] Activies gameType)
     {
         UserJwtConnexion? token = _jwtDecode.GetUserAuthInformations(Request.Headers.Authorization.ToString()) ??
             throw new Exception("User informations are missing in the JWT.");
 
-        RandomSongsDTO song = await _mediator.Send(new GuessQuery(token, definedGenre, gameType));
+        if (token.UserId.Length == 0)
+        {
+            string jwt = Request.Headers.Authorization.ToString();
+            token.UserId = jwt.Split('.')[2].Substring(0, Math.Min(10, jwt.Length));
+        }
+
+        RandomSongsDTO song = await _mediator.Send(new GuessQuery(token, definedGenre, profile, gameType));
 
         return Ok(song);
     }
