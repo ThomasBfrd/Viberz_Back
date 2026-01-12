@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.OpenApi.Models;
 using Swashbuckle.AspNetCore.Filters;
 using System.IdentityModel.Tokens.Jwt;
@@ -31,6 +32,18 @@ using Viberz.Infrastructure.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}");
+
+if (!builder.Environment.IsDevelopment())
+{
+    foreach (JsonConfigurationSource source in builder.Configuration.Sources.ToList()) {
+        
+        if (source is JsonConfigurationSource jsonSource)
+        {
+            source.ReloadOnChange = false;
+        }
+
+    }
+}
 
 // Add services to the container.
 builder.Services.AddControllers();
