@@ -35,9 +35,13 @@ Console.WriteLine($"Current environment: {builder.Environment.EnvironmentName}")
 
 if (!builder.Environment.IsDevelopment())
 {
-    foreach (JsonConfigurationSource source in builder.Configuration.Sources
-    .ToList()) {
-        source.ReloadOnChange = false;
+    foreach (JsonConfigurationSource source in builder.Configuration.Sources.ToList()) {
+        
+        if (source is JsonConfigurationSource jsonSource)
+        {
+            source.ReloadOnChange = false;
+        }
+
     }
 }
 
